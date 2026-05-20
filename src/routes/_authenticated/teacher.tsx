@@ -41,8 +41,7 @@ function TeacherPage() {
     try {
       setBusy(true);
       toast.info("Parsing PDF…");
-      const pdfjs = await import("pdfjs-dist");
-      // @ts-expect-error worker URL
+      const pdfjs: any = await import("pdfjs-dist");
       const workerUrl = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
       pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
       const buf = await file.arrayBuffer();
