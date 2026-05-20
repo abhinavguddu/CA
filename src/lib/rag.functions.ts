@@ -93,7 +93,7 @@ export const askDoubt = createServerFn({ method: "POST" })
       const { data: matches } = await supabase.rpc("match_knowledge", {
         query_embedding: qEmbed as unknown as string,
         match_count: 5,
-        filter_subject: data.subjectId ?? null,
+        filter_subject: data.subjectId ?? undefined,
       });
       contextChunks = (matches ?? []) as typeof contextChunks;
     } catch (e) {
