@@ -23,6 +23,7 @@ function Layout() {
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/doubts", icon: MessageSquare, label: "Ask Doubts" },
     { to: "/syllabus", icon: BookOpen, label: "Syllabus" },
+    { to: "/past-questions", icon: FileQuestion, label: "Past Questions" },
     ...(isTeacher ? [{ to: "/teacher", icon: Upload, label: "Knowledge" }] : []),
   ] as const;
 
