@@ -131,6 +131,71 @@ export type Database = {
           },
         ]
       }
+      past_questions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          difficulty: string | null
+          exam_month: string
+          exam_year: number
+          id: string
+          level: Database["public"]["Enums"]["ca_level"]
+          marks: number | null
+          official_answer: string | null
+          paper: string | null
+          question_number: string | null
+          question_text: string
+          source_url: string | null
+          subject_id: string | null
+          topic_tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          difficulty?: string | null
+          exam_month: string
+          exam_year: number
+          id?: string
+          level: Database["public"]["Enums"]["ca_level"]
+          marks?: number | null
+          official_answer?: string | null
+          paper?: string | null
+          question_number?: string | null
+          question_text: string
+          source_url?: string | null
+          subject_id?: string | null
+          topic_tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          difficulty?: string | null
+          exam_month?: string
+          exam_year?: number
+          id?: string
+          level?: Database["public"]["Enums"]["ca_level"]
+          marks?: number | null
+          official_answer?: string | null
+          paper?: string | null
+          question_number?: string | null
+          question_text?: string
+          source_url?: string | null
+          subject_id?: string | null
+          topic_tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "past_questions_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -154,6 +219,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      question_answers: {
+        Row: {
+          answer: string
+          citations: Json | null
+          created_at: string
+          generated_by: string | null
+          id: string
+          model: string | null
+          question_id: string
+        }
+        Insert: {
+          answer: string
+          citations?: Json | null
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          model?: string | null
+          question_id: string
+        }
+        Update: {
+          answer?: string
+          citations?: Json | null
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          model?: string | null
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "past_questions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subjects: {
         Row: {

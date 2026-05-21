@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTeacherRouteImport } from './routes/_authenticated/teacher'
 import { Route as AuthenticatedSyllabusRouteImport } from './routes/_authenticated/syllabus'
+import { Route as AuthenticatedPastQuestionsRouteImport } from './routes/_authenticated/past-questions'
 import { Route as AuthenticatedDoubtsRouteImport } from './routes/_authenticated/doubts'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 
@@ -47,6 +48,12 @@ const AuthenticatedSyllabusRoute = AuthenticatedSyllabusRouteImport.update({
   path: '/syllabus',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPastQuestionsRoute =
+  AuthenticatedPastQuestionsRouteImport.update({
+    id: '/past-questions',
+    path: '/past-questions',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedDoubtsRoute = AuthenticatedDoubtsRouteImport.update({
   id: '/doubts',
   path: '/doubts',
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/doubts': typeof AuthenticatedDoubtsRoute
+  '/past-questions': typeof AuthenticatedPastQuestionsRoute
   '/syllabus': typeof AuthenticatedSyllabusRoute
   '/teacher': typeof AuthenticatedTeacherRoute
 }
@@ -73,6 +81,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/doubts': typeof AuthenticatedDoubtsRoute
+  '/past-questions': typeof AuthenticatedPastQuestionsRoute
   '/syllabus': typeof AuthenticatedSyllabusRoute
   '/teacher': typeof AuthenticatedTeacherRoute
 }
@@ -84,6 +93,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/doubts': typeof AuthenticatedDoubtsRoute
+  '/_authenticated/past-questions': typeof AuthenticatedPastQuestionsRoute
   '/_authenticated/syllabus': typeof AuthenticatedSyllabusRoute
   '/_authenticated/teacher': typeof AuthenticatedTeacherRoute
 }
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/dashboard'
     | '/doubts'
+    | '/past-questions'
     | '/syllabus'
     | '/teacher'
   fileRoutesByTo: FileRoutesByTo
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/dashboard'
     | '/doubts'
+    | '/past-questions'
     | '/syllabus'
     | '/teacher'
   id:
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_authenticated/dashboard'
     | '/_authenticated/doubts'
+    | '/_authenticated/past-questions'
     | '/_authenticated/syllabus'
     | '/_authenticated/teacher'
   fileRoutesById: FileRoutesById
@@ -169,6 +182,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSyllabusRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/past-questions': {
+      id: '/_authenticated/past-questions'
+      path: '/past-questions'
+      fullPath: '/past-questions'
+      preLoaderRoute: typeof AuthenticatedPastQuestionsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/doubts': {
       id: '/_authenticated/doubts'
       path: '/doubts'
@@ -189,6 +209,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDoubtsRoute: typeof AuthenticatedDoubtsRoute
+  AuthenticatedPastQuestionsRoute: typeof AuthenticatedPastQuestionsRoute
   AuthenticatedSyllabusRoute: typeof AuthenticatedSyllabusRoute
   AuthenticatedTeacherRoute: typeof AuthenticatedTeacherRoute
 }
@@ -196,6 +217,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDoubtsRoute: AuthenticatedDoubtsRoute,
+  AuthenticatedPastQuestionsRoute: AuthenticatedPastQuestionsRoute,
   AuthenticatedSyllabusRoute: AuthenticatedSyllabusRoute,
   AuthenticatedTeacherRoute: AuthenticatedTeacherRoute,
 }
