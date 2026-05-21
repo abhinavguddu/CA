@@ -184,10 +184,10 @@ function PastQuestionsPage() {
                     <div className="prose prose-sm dark:prose-invert max-w-none rounded-lg border border-border p-5">
                       <ReactMarkdown>{answer.answer}</ReactMarkdown>
                     </div>
-                    {answer.citations.length > 0 && (
+                    {Array.isArray(answer.citations) && answer.citations.length > 0 && (
                       <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
                         <span className="font-medium">References:</span>
-                        {answer.citations.map((c) => (
+                        {(answer.citations as any[]).map((c: any) => (
                           <span key={c.n} className="rounded bg-muted px-1.5 py-0.5">[{c.n}] {c.title}</span>
                         ))}
                       </div>
