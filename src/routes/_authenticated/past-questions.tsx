@@ -31,7 +31,7 @@ function PastQuestionsPage() {
   const [search, setSearch] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
-  const [answer, setAnswer] = useState<{ answer: string; citations: any[] } | null>(null);
+  const [answer, setAnswer] = useState<{ answer: string; citations: any } | null>(null);
 
   const { data: subjects } = useQuery({
     queryKey: ["subjects"],
