@@ -12,12 +12,16 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateDetailedAnswer, addPastQuestion } from "@/lib/past-questions.functions";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
-import { FileQuestion, Sparkles, RefreshCw, Plus, Calendar, BookMarked } from "lucide-react";
+import { FileQuestion, Sparkles, RefreshCw, Plus, Calendar, BookMarked, CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/past-questions")({ component: PastQuestionsPage });
+
+type AnswerResult = { answer: string; citations: any[] };
 
 function PastQuestionsPage() {
   const { isTeacher } = useAuth();
@@ -29,9 +33,8 @@ function PastQuestionsPage() {
   const [subjectId, setSubjectId] = useState<string>("all");
   const [year, setYear] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [view, setView] = useState<"grid" | "subject">("subject");
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [generating, setGenerating] = useState(false);
-  const [answer, setAnswer] = useState<{ answer: string; citations: any } | null>(null);
 
   const { data: subjects } = useQuery({
     queryKey: ["subjects"],
@@ -41,7 +44,7 @@ function PastQuestionsPage() {
   const { data: questions } = useQuery({
     queryKey: ["past_questions", level, subjectId, year, search],
     queryFn: async () => {
-      let q = supabase.from("past_questions").select("*, subjects(name, level)").order("exam_year", { ascending: false }).order("exam_month", { ascending: false }).limit(200);
+      let q = supabase.from("past_questions").select("*, subjects(name, level)").order("exam_year", { ascending: false }).order("exam_month", { ascending: false }).limit(500);
       if (level !== "all") q = q.eq("level", level as any);
       if (subjectId !== "all") q = q.eq("subject_id", subjectId);
       if (year !== "all") q = q.eq("exam_year", parseInt(year));
@@ -51,6 +54,41 @@ function PastQuestionsPage() {
     },
   });
 
+  // Which questions already have a cached answer in DB — so we can show a badge
+  const { data: answeredIds } = useQuery({
+    queryKey: ["answered_question_ids"],
+    queryFn: async () => {
+      const { data } = await supabase.from("question_answers").select("question_id");
+      return new Set((data ?? []).map((r: any) => r.question_id as string));
+    },
+    staleTime: 60_000,
+  });
+
+  // Cached answer query — one fetch per question per session, then served from cache forever
+  const answerQuery = useQuery<AnswerResult>({
+    queryKey: ["question_answer", activeId],
+    enabled: !!activeId,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    retry: false,
+    queryFn: async () => {
+      const r = await genFn({ data: { questionId: activeId! } });
+      return { answer: r.answer, citations: (r.citations ?? []) as any[] };
+    },
+  });
+
+  async function regenerate() {
+    if (!activeId) return;
+    try {
+      const r = await genFn({ data: { questionId: activeId, regenerate: true } });
+      qc.setQueryData<AnswerResult>(["question_answer", activeId], { answer: r.answer, citations: (r.citations ?? []) as any[] });
+      qc.invalidateQueries({ queryKey: ["answered_question_ids"] });
+      toast.success("Regenerated");
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed");
+    }
+  }
+
   const years = useMemo(() => {
     const s = new Set<number>();
     (questions ?? []).forEach((q: any) => s.add(q.exam_year));
@@ -59,33 +97,45 @@ function PastQuestionsPage() {
 
   const active = (questions ?? []).find((q: any) => q.id === activeId);
 
-  async function openQuestion(id: string) {
-    setActiveId(id);
-    setAnswer(null);
-    setGenerating(true);
-    try {
-      const r = await genFn({ data: { questionId: id } });
-      setAnswer({ answer: r.answer, citations: r.citations });
-    } catch (e: any) {
-      toast.error(e.message ?? "Failed to generate");
-    } finally {
-      setGenerating(false);
+  // Group questions by subject for the "By subject" view
+  const grouped = useMemo(() => {
+    const map = new Map<string, { key: string; subjectName: string; subjectLevel: string; items: any[] }>();
+    for (const q of questions ?? []) {
+      const key = q.subject_id ?? "_none";
+      const subjectName = q.subjects?.name ?? "Uncategorised";
+      const subjectLevel = q.subjects?.level ?? q.level ?? "";
+      if (!map.has(key)) map.set(key, { key, subjectName, subjectLevel, items: [] });
+      map.get(key)!.items.push(q);
     }
-  }
+    return Array.from(map.values()).sort((a, b) => {
+      const order = { Foundation: 0, Intermediate: 1, Final: 2 } as Record<string, number>;
+      const la = order[a.subjectLevel] ?? 9;
+      const lb = order[b.subjectLevel] ?? 9;
+      if (la !== lb) return la - lb;
+      return a.subjectName.localeCompare(b.subjectName);
+    });
+  }, [questions]);
 
-  async function regenerate() {
-    if (!activeId) return;
-    setGenerating(true);
-    setAnswer(null);
-    try {
-      const r = await genFn({ data: { questionId: activeId, regenerate: true } });
-      setAnswer({ answer: r.answer, citations: r.citations });
-      toast.success("Regenerated");
-    } catch (e: any) {
-      toast.error(e.message ?? "Failed");
-    } finally {
-      setGenerating(false);
-    }
+  function QuestionCard({ q }: { q: any }) {
+    const hasAnswer = answeredIds?.has(q.id);
+    return (
+      <Card className="group cursor-pointer p-5 transition hover:border-[var(--gold)]/60" onClick={() => setActiveId(q.id)}>
+        <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <Badge variant="outline">{q.level}</Badge>
+          {q.subjects?.name && <Badge variant="secondary">{q.subjects.name}</Badge>}
+          <span className="flex items-center gap-1"><Calendar className="size-3" />{q.exam_month} {q.exam_year}</span>
+          {q.marks && <span className="ml-auto font-medium text-[var(--gold)]">{q.marks} marks</span>}
+        </div>
+        <p className="line-clamp-4 text-sm">{q.question_text}</p>
+        <div className="mt-3 flex items-center gap-2 text-xs">
+          {hasAnswer ? (
+            <span className="flex items-center gap-1 text-emerald-500"><CheckCircle2 className="size-3" />Saved answer — click to view</span>
+          ) : (
+            <span className="flex items-center gap-1 text-muted-foreground"><Sparkles className="size-3 text-[var(--gold)]" />Click for detailed model answer</span>
+          )}
+        </div>
+      </Card>
+    );
   }
 
   return (
@@ -127,31 +177,54 @@ function PastQuestionsPage() {
         <Input placeholder="Search question text…" value={search} onChange={(e) => setSearch(e.target.value)} />
       </Card>
 
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-        {(questions ?? []).map((q: any) => (
-          <Card key={q.id} className="group cursor-pointer p-5 transition hover:border-[var(--gold)]/60" onClick={() => openQuestion(q.id)}>
-            <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <Badge variant="outline">{q.level}</Badge>
-              {q.subjects?.name && <Badge variant="secondary">{q.subjects.name}</Badge>}
-              <span className="flex items-center gap-1"><Calendar className="size-3" />{q.exam_month} {q.exam_year}</span>
-              {q.marks && <span className="ml-auto font-medium text-[var(--gold)]">{q.marks} marks</span>}
-            </div>
-            <p className="line-clamp-4 text-sm">{q.question_text}</p>
-            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-              <Sparkles className="size-3 text-[var(--gold)]" />
-              <span>Click for detailed model answer</span>
-            </div>
-          </Card>
-        ))}
-        {!questions?.length && (
-          <Card className="col-span-full p-10 text-center text-muted-foreground">
-            <FileQuestion className="mx-auto size-8" />
-            <p className="mt-2">No past questions yet. {isTeacher ? "Add the first one above." : "Ask your teacher to add some."}</p>
-          </Card>
-        )}
+      <div className="flex items-center justify-between">
+        <Tabs value={view} onValueChange={(v) => setView(v as any)}>
+          <TabsList>
+            <TabsTrigger value="subject">By subject</TabsTrigger>
+            <TabsTrigger value="grid">All questions</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <span className="text-xs text-muted-foreground">{questions?.length ?? 0} questions</span>
       </div>
 
-      <Dialog open={!!activeId} onOpenChange={(o) => { if (!o) { setActiveId(null); setAnswer(null); } }}>
+      {view === "grid" ? (
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {(questions ?? []).map((q: any) => <QuestionCard key={q.id} q={q} />)}
+          {!questions?.length && (
+            <Card className="col-span-full p-10 text-center text-muted-foreground">
+              <FileQuestion className="mx-auto size-8" />
+              <p className="mt-2">No past questions yet. {isTeacher ? "Add the first one above." : "Ask your teacher to add some."}</p>
+            </Card>
+          )}
+        </div>
+      ) : (
+        <Accordion type="multiple" defaultValue={grouped.slice(0, 1).map((g) => g.key)} className="space-y-2">
+          {grouped.map((g) => (
+            <AccordionItem key={g.key} value={g.key} className="rounded-lg border border-border bg-card px-4">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex flex-wrap items-center gap-2 text-left">
+                  <span className="font-display text-lg">{g.subjectName}</span>
+                  {g.subjectLevel && <Badge variant="outline">{g.subjectLevel}</Badge>}
+                  <Badge variant="secondary">{g.items.length} Qs</Badge>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid gap-3 pb-2 md:grid-cols-2 lg:grid-cols-3">
+                  {g.items.map((q: any) => <QuestionCard key={q.id} q={q} />)}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+          {!grouped.length && (
+            <Card className="p-10 text-center text-muted-foreground">
+              <FileQuestion className="mx-auto size-8" />
+              <p className="mt-2">No past questions yet.</p>
+            </Card>
+          )}
+        </Accordion>
+      )}
+
+      <Dialog open={!!activeId} onOpenChange={(o) => { if (!o) setActiveId(null); }}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle className="font-display text-2xl">
@@ -173,21 +246,22 @@ function PastQuestionsPage() {
 
                 <div className="flex items-center justify-between">
                   <h3 className="font-display text-xl">Detailed model answer</h3>
-                  <Button size="sm" variant="outline" onClick={regenerate} disabled={generating}>
-                    <RefreshCw className={`mr-1 size-3 ${generating ? "animate-spin" : ""}`} />Regenerate
+                  <Button size="sm" variant="outline" onClick={regenerate} disabled={answerQuery.isFetching}>
+                    <RefreshCw className={`mr-1 size-3 ${answerQuery.isFetching ? "animate-spin" : ""}`} />Regenerate
                   </Button>
                 </div>
 
-                {generating && <div className="text-sm text-muted-foreground">Generating detailed answer with citations…</div>}
-                {answer && (
+                {answerQuery.isLoading && <div className="text-sm text-muted-foreground">Loading saved answer / generating…</div>}
+                {answerQuery.isError && <div className="text-sm text-destructive">{(answerQuery.error as any)?.message ?? "Failed to load"}</div>}
+                {answerQuery.data && (
                   <>
                     <div className="prose prose-sm dark:prose-invert max-w-none rounded-lg border border-border p-5">
-                      <ReactMarkdown>{answer.answer}</ReactMarkdown>
+                      <ReactMarkdown>{answerQuery.data.answer}</ReactMarkdown>
                     </div>
-                    {Array.isArray(answer.citations) && answer.citations.length > 0 && (
+                    {Array.isArray(answerQuery.data.citations) && answerQuery.data.citations.length > 0 && (
                       <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
                         <span className="font-medium">References:</span>
-                        {(answer.citations as any[]).map((c: any) => (
+                        {answerQuery.data.citations.map((c: any) => (
                           <span key={c.n} className="rounded bg-muted px-1.5 py-0.5">[{c.n}] {c.title}</span>
                         ))}
                       </div>
