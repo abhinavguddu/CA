@@ -1,5 +1,4 @@
 {
-  "framework": null,
   "buildCommand": "vite build",
   "outputDirectory": "dist/client",
   "functions": {
@@ -8,14 +7,10 @@
       "includeFiles": "dist/server/**"
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api/index.js"
+      "source": "/(.*)",
+      "destination": "/api/index.js"
     }
   ]
 }
