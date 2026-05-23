@@ -6,7 +6,7 @@ export default defineConfig({
   cloudflare: false,
   tanstackStart: {
     server: {
-      preset: isVercel ? "vercel-edge" : undefined,
+      preset: isVercel ? "vercel" : undefined,
       entry: "server",
     },
   },
