@@ -15,9 +15,13 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTeacherRouteImport } from './routes/_authenticated/teacher'
 import { Route as AuthenticatedSyllabusRouteImport } from './routes/_authenticated/syllabus'
+import { Route as AuthenticatedStreaksRouteImport } from './routes/_authenticated/streaks'
 import { Route as AuthenticatedPastQuestionsRouteImport } from './routes/_authenticated/past-questions'
+import { Route as AuthenticatedMockTestRouteImport } from './routes/_authenticated/mock-test'
+import { Route as AuthenticatedFormulaSheetsRouteImport } from './routes/_authenticated/formula-sheets'
 import { Route as AuthenticatedDoubtsRouteImport } from './routes/_authenticated/doubts'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedBookmarksRouteImport } from './routes/_authenticated/bookmarks'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -48,10 +52,26 @@ const AuthenticatedSyllabusRoute = AuthenticatedSyllabusRouteImport.update({
   path: '/syllabus',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedStreaksRoute = AuthenticatedStreaksRouteImport.update({
+  id: '/streaks',
+  path: '/streaks',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedPastQuestionsRoute =
   AuthenticatedPastQuestionsRouteImport.update({
     id: '/past-questions',
     path: '/past-questions',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedMockTestRoute = AuthenticatedMockTestRouteImport.update({
+  id: '/mock-test',
+  path: '/mock-test',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedFormulaSheetsRoute =
+  AuthenticatedFormulaSheetsRouteImport.update({
+    id: '/formula-sheets',
+    path: '/formula-sheets',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedDoubtsRoute = AuthenticatedDoubtsRouteImport.update({
@@ -64,14 +84,23 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedBookmarksRoute = AuthenticatedBookmarksRouteImport.update({
+  id: '/bookmarks',
+  path: '/bookmarks',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/bookmarks': typeof AuthenticatedBookmarksRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/doubts': typeof AuthenticatedDoubtsRoute
+  '/formula-sheets': typeof AuthenticatedFormulaSheetsRoute
+  '/mock-test': typeof AuthenticatedMockTestRoute
   '/past-questions': typeof AuthenticatedPastQuestionsRoute
+  '/streaks': typeof AuthenticatedStreaksRoute
   '/syllabus': typeof AuthenticatedSyllabusRoute
   '/teacher': typeof AuthenticatedTeacherRoute
 }
@@ -79,9 +108,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/bookmarks': typeof AuthenticatedBookmarksRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/doubts': typeof AuthenticatedDoubtsRoute
+  '/formula-sheets': typeof AuthenticatedFormulaSheetsRoute
+  '/mock-test': typeof AuthenticatedMockTestRoute
   '/past-questions': typeof AuthenticatedPastQuestionsRoute
+  '/streaks': typeof AuthenticatedStreaksRoute
   '/syllabus': typeof AuthenticatedSyllabusRoute
   '/teacher': typeof AuthenticatedTeacherRoute
 }
@@ -91,9 +124,13 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/_authenticated/bookmarks': typeof AuthenticatedBookmarksRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/doubts': typeof AuthenticatedDoubtsRoute
+  '/_authenticated/formula-sheets': typeof AuthenticatedFormulaSheetsRoute
+  '/_authenticated/mock-test': typeof AuthenticatedMockTestRoute
   '/_authenticated/past-questions': typeof AuthenticatedPastQuestionsRoute
+  '/_authenticated/streaks': typeof AuthenticatedStreaksRoute
   '/_authenticated/syllabus': typeof AuthenticatedSyllabusRoute
   '/_authenticated/teacher': typeof AuthenticatedTeacherRoute
 }
@@ -103,9 +140,13 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/signup'
+    | '/bookmarks'
     | '/dashboard'
     | '/doubts'
+    | '/formula-sheets'
+    | '/mock-test'
     | '/past-questions'
+    | '/streaks'
     | '/syllabus'
     | '/teacher'
   fileRoutesByTo: FileRoutesByTo
@@ -113,9 +154,13 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/signup'
+    | '/bookmarks'
     | '/dashboard'
     | '/doubts'
+    | '/formula-sheets'
+    | '/mock-test'
     | '/past-questions'
+    | '/streaks'
     | '/syllabus'
     | '/teacher'
   id:
@@ -124,9 +169,13 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/login'
     | '/signup'
+    | '/_authenticated/bookmarks'
     | '/_authenticated/dashboard'
     | '/_authenticated/doubts'
+    | '/_authenticated/formula-sheets'
+    | '/_authenticated/mock-test'
     | '/_authenticated/past-questions'
+    | '/_authenticated/streaks'
     | '/_authenticated/syllabus'
     | '/_authenticated/teacher'
   fileRoutesById: FileRoutesById
@@ -182,11 +231,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSyllabusRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/streaks': {
+      id: '/_authenticated/streaks'
+      path: '/streaks'
+      fullPath: '/streaks'
+      preLoaderRoute: typeof AuthenticatedStreaksRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/past-questions': {
       id: '/_authenticated/past-questions'
       path: '/past-questions'
       fullPath: '/past-questions'
       preLoaderRoute: typeof AuthenticatedPastQuestionsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/mock-test': {
+      id: '/_authenticated/mock-test'
+      path: '/mock-test'
+      fullPath: '/mock-test'
+      preLoaderRoute: typeof AuthenticatedMockTestRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/formula-sheets': {
+      id: '/_authenticated/formula-sheets'
+      path: '/formula-sheets'
+      fullPath: '/formula-sheets'
+      preLoaderRoute: typeof AuthenticatedFormulaSheetsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/doubts': {
@@ -203,21 +273,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/bookmarks': {
+      id: '/_authenticated/bookmarks'
+      path: '/bookmarks'
+      fullPath: '/bookmarks'
+      preLoaderRoute: typeof AuthenticatedBookmarksRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedBookmarksRoute: typeof AuthenticatedBookmarksRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDoubtsRoute: typeof AuthenticatedDoubtsRoute
+  AuthenticatedFormulaSheetsRoute: typeof AuthenticatedFormulaSheetsRoute
+  AuthenticatedMockTestRoute: typeof AuthenticatedMockTestRoute
   AuthenticatedPastQuestionsRoute: typeof AuthenticatedPastQuestionsRoute
+  AuthenticatedStreaksRoute: typeof AuthenticatedStreaksRoute
   AuthenticatedSyllabusRoute: typeof AuthenticatedSyllabusRoute
   AuthenticatedTeacherRoute: typeof AuthenticatedTeacherRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedBookmarksRoute: AuthenticatedBookmarksRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDoubtsRoute: AuthenticatedDoubtsRoute,
+  AuthenticatedFormulaSheetsRoute: AuthenticatedFormulaSheetsRoute,
+  AuthenticatedMockTestRoute: AuthenticatedMockTestRoute,
   AuthenticatedPastQuestionsRoute: AuthenticatedPastQuestionsRoute,
+  AuthenticatedStreaksRoute: AuthenticatedStreaksRoute,
   AuthenticatedSyllabusRoute: AuthenticatedSyllabusRoute,
   AuthenticatedTeacherRoute: AuthenticatedTeacherRoute,
 }

@@ -13,6 +13,10 @@ import {
   Menu,
   X,
   ChevronRight,
+  ClipboardList,
+  Bookmark,
+  FileText,
+  Flame,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Footer } from "@/components/Footer";
@@ -57,6 +61,10 @@ function Layout() {
     { to: "/doubts", icon: MessageSquare, label: "Ask Doubts", color: "text-blue-400" },
     { to: "/syllabus", icon: BookOpen, label: "Syllabus", color: "text-violet-400" },
     { to: "/past-questions", icon: FileQuestion, label: "Past Questions", color: "text-amber-400" },
+    { to: "/mock-test", icon: ClipboardList, label: "Mock Test", color: "text-purple-400" },
+    { to: "/bookmarks", icon: Bookmark, label: "Bookmarks", color: "text-pink-400" },
+    { to: "/formula-sheets", icon: FileText, label: "Formula Sheets", color: "text-cyan-400" },
+    { to: "/streaks", icon: Flame, label: "Study Streak", color: "text-orange-400" },
     ...(isTeacher ? [{ to: "/teacher", icon: Upload, label: "Knowledge Base", color: "text-rose-400" }] : []),
   ] as const;
 

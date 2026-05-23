@@ -2,23 +2,22 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const GATEWAY = "https://ai.gateway.lovable.dev/v1";
+const GEMINI_API_BASE = "https://generativelanguage.googleapis.com";
 
 async function embed(text: string): Promise<number[]> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("LOVABLE_API_KEY missing");
-  const r = await fetch(`${GATEWAY}/embeddings`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "google/gemini-embedding-001",
-      input: text,
-      dimensions: 1536,
-    }),
-  });
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) throw new Error("GEMINI_API_KEY missing");
+  const r = await fetch(
+    `${GEMINI_API_BASE}/v1beta/models/text-embedding-004:embedContent?key=${key}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "models/text-embedding-004", content: { parts: [{ text }] } }),
+    },
+  );
   if (!r.ok) throw new Error(`Embedding failed: ${r.status} ${await r.text()}`);
   const j = await r.json();
-  return j.data[0].embedding;
+  return j.embedding.values;
 }
 
 function chunkText(text: string, size = 1200, overlap = 150): string[] {
@@ -135,21 +134,31 @@ ${ctxBlock}`,
       { role: "user", content: data.question },
     ];
 
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY missing");
-    const r = await fetch(`${GATEWAY}/chat/completions`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "google/gemini-2.5-flash", messages }),
-    });
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) throw new Error("GEMINI_API_KEY missing");
+    const geminiMessages = messages.filter((m) => m.role !== "system");
+    const systemMsg = messages.find((m) => m.role === "system");
+    const r = await fetch(
+      `${GEMINI_API_BASE}/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: systemMsg ? { parts: [{ text: systemMsg.content }] } : undefined,
+          contents: geminiMessages.map((m) => ({
+            role: m.role === "assistant" ? "model" : "user",
+            parts: [{ text: m.content }],
+          })),
+        }),
+      },
+    );
     if (!r.ok) {
       const body = await r.text();
       if (r.status === 429) throw new Error("Rate limit reached. Please try again in a moment.");
-      if (r.status === 402) throw new Error("AI credits exhausted. Please add credits.");
-      throw new Error(`AI gateway error: ${r.status} ${body}`);
+      throw new Error(`Gemini error: ${r.status} ${body}`);
     }
     const j = await r.json();
-    const answer: string = j.choices?.[0]?.message?.content ?? "Sorry, no answer.";
+    const answer: string = j.candidates?.[0]?.content?.parts?.[0]?.text ?? "Sorry, no answer.";
 
     const citations = contextChunks.map((c, i) => ({
       n: i + 1,

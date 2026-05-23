@@ -2,19 +2,22 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const GATEWAY = "https://ai.gateway.lovable.dev/v1";
+const GEMINI_API_BASE = "https://generativelanguage.googleapis.com";
 
 async function embed(text: string): Promise<number[]> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("LOVABLE_API_KEY missing");
-  const r = await fetch(`${GATEWAY}/embeddings`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "google/gemini-embedding-001", input: text, dimensions: 1536 }),
-  });
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) throw new Error("GEMINI_API_KEY missing");
+  const r = await fetch(
+    `${GEMINI_API_BASE}/v1beta/models/text-embedding-004:embedContent?key=${key}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "models/text-embedding-004", content: { parts: [{ text }] } }),
+    },
+  );
   if (!r.ok) throw new Error(`Embedding failed: ${r.status}`);
   const j = await r.json();
-  return j.data[0].embedding;
+  return j.embedding.values;
 }
 
 export const generateDetailedAnswer = createServerFn({ method: "POST" })
@@ -78,30 +81,32 @@ ${ctx}`;
 
     const user = `Question (${q.marks ?? "?"} marks):\n${q.question_text}\n\n${q.official_answer ? `Official/suggested answer outline for reference:\n${q.official_answer}\n\n` : ""}Write the full model answer now.`;
 
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY missing");
-    const r = await fetch(`${GATEWAY}/chat/completions`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "system", content: sys }, { role: "user", content: user }],
-      }),
-    });
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) throw new Error("GEMINI_API_KEY missing");
+    const r = await fetch(
+      `${GEMINI_API_BASE}/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: sys }] },
+          contents: [{ role: "user", parts: [{ text: user }] }],
+        }),
+      },
+    );
     if (!r.ok) {
       if (r.status === 429) throw new Error("Rate limit reached. Try again shortly.");
-      if (r.status === 402) throw new Error("AI credits exhausted.");
-      throw new Error(`AI gateway error: ${r.status}`);
+      throw new Error(`Gemini error: ${r.status}`);
     }
     const j = await r.json();
-    const answer: string = j.choices?.[0]?.message?.content ?? "No answer.";
+    const answer: string = j.candidates?.[0]?.content?.parts?.[0]?.text ?? "No answer.";
     const citations = chunks.map((c, i) => ({ n: i + 1, title: c.source_title, similarity: Number(c.similarity?.toFixed?.(3) ?? 0) }));
 
     await supabase.from("question_answers").insert({
       question_id: data.questionId,
       answer,
       citations,
-      model: "google/gemini-2.5-flash",
+      model: "gemini-2.5-flash",
       generated_by: userId,
     });
 

@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { MessageSquare, BookOpen, Sparkles, ArrowRight, PlayCircle, Trophy, TrendingUp, Zap, Star } from "lucide-react";
+import { MessageSquare, BookOpen, Sparkles, ArrowRight, PlayCircle, Trophy, TrendingUp, Zap, Star, ClipboardList, Bookmark, FileText, Flame, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({ component: Dashboard });
@@ -12,6 +13,12 @@ const fadeUp = (delay = 0) => ({
   animate: { opacity: 1, y: 0 },
   transition: { delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
 });
+
+const CA_EXAMS = [
+  { label: "CA Foundation", date: new Date("2026-06-01"), color: "from-emerald-500 to-teal-500", shadow: "shadow-emerald-500/20" },
+  { label: "CA Intermediate", date: new Date("2026-05-03"), color: "from-blue-500 to-indigo-500", shadow: "shadow-blue-500/20" },
+  { label: "CA Final", date: new Date("2026-05-03"), color: "from-violet-500 to-purple-500", shadow: "shadow-violet-500/20" },
+];
 
 function Dashboard() {
   const { user } = useAuth();
@@ -29,7 +36,6 @@ function Dashboard() {
   });
 
   const pct = stats && stats.topics > 0 ? Math.round((stats.completed / stats.topics) * 100) : 0;
-
   const circleRadius = 42;
   const circleCircumference = 2 * Math.PI * circleRadius;
   const circleStrokeDashoffset = circleCircumference - (pct / 100) * circleCircumference;
@@ -47,6 +53,17 @@ function Dashboard() {
     "ICAI tests not just knowledge, but perseverance.",
   ];
   const quote = motivationalQuotes[new Date().getDay() % motivationalQuotes.length];
+
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000 * 60);
+    return () => clearInterval(t);
+  }, []);
+
+  const upcomingExams = CA_EXAMS.map((e) => {
+    const days = Math.ceil((e.date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return { ...e, days };
+  }).filter((e) => e.days > 0).sort((a, b) => a.days - b.days);
 
   return (
     <div className="min-h-full mesh-bg">
@@ -72,11 +89,8 @@ function Dashboard() {
           {/* Progress Card */}
           <motion.div {...fadeUp(0.08)}>
             <div className="premium-card rounded-2xl p-6 h-full relative overflow-hidden group">
-              {/* Top accent bar */}
               <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/0 via-primary to-primary/0" />
-              {/* Background glow */}
               <div className="absolute -top-8 -right-8 w-32 h-32 bg-primary/8 rounded-full blur-2xl group-hover:bg-primary/14 transition-colors duration-500" />
-
               <div className="flex items-center gap-2.5 mb-6">
                 <div className="flex items-center justify-center size-9 rounded-xl bg-primary/10 text-primary">
                   <TrendingUp className="size-4" />
@@ -86,23 +100,14 @@ function Dashboard() {
                   <p className="text-xs text-muted-foreground">Overall completion</p>
                 </div>
               </div>
-
               <div className="flex items-center gap-5">
-                {/* Circular progress */}
                 <div className="relative size-[100px] flex-shrink-0">
                   <svg className="size-full -rotate-90" viewBox="0 0 100 100">
-                    <circle
-                      className="text-muted/60 stroke-current"
-                      strokeWidth="7"
-                      cx="50" cy="50" r={circleRadius}
-                      fill="transparent"
-                    />
+                    <circle className="text-muted/60 stroke-current" strokeWidth="7" cx="50" cy="50" r={circleRadius} fill="transparent" />
                     <motion.circle
                       className="text-primary stroke-current"
-                      strokeWidth="7"
-                      strokeLinecap="round"
-                      cx="50" cy="50" r={circleRadius}
-                      fill="transparent"
+                      strokeWidth="7" strokeLinecap="round"
+                      cx="50" cy="50" r={circleRadius} fill="transparent"
                       initial={{ strokeDashoffset: circleCircumference }}
                       animate={{ strokeDashoffset: circleStrokeDashoffset }}
                       transition={{ duration: 1.8, ease: "easeOut", delay: 0.3 }}
@@ -131,7 +136,6 @@ function Dashboard() {
               <div className="premium-card rounded-2xl p-6 h-full relative overflow-hidden cursor-pointer">
                 <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500/0 via-blue-500 to-blue-500/0" />
                 <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-blue-500/6 rounded-full blur-2xl group-hover:bg-blue-500/12 transition-colors duration-500" />
-
                 <div className="flex items-center gap-2.5 mb-6">
                   <div className="flex items-center justify-center size-9 rounded-xl bg-blue-500/10 text-blue-500">
                     <MessageSquare className="size-4" />
@@ -141,12 +145,10 @@ function Dashboard() {
                     <p className="text-xs text-muted-foreground">AI-resolved doubts</p>
                   </div>
                 </div>
-
                 <div className="mb-6">
                   <p className="text-5xl font-display tabular-nums">{stats?.doubts ?? 0}</p>
                   <p className="text-sm text-muted-foreground mt-1">doubts answered</p>
                 </div>
-
                 <div className="flex items-center gap-1.5 text-sm font-semibold text-blue-500 group-hover:gap-2.5 transition-all duration-200">
                   <span>Ask a new doubt</span>
                   <ArrowRight className="size-4" />
@@ -158,10 +160,8 @@ function Dashboard() {
           {/* AI Teacher Card */}
           <motion.div {...fadeUp(0.20)}>
             <div className="rounded-2xl p-6 h-full relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/85 shadow-xl shadow-primary/20">
-              {/* Decoration */}
               <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-2xl translate-x-12 -translate-y-12" />
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-gold/10 rounded-full blur-xl -translate-x-8 translate-y-8" />
-
               <div className="relative z-10 flex flex-col h-full">
                 <div className="flex items-center gap-2.5 mb-4">
                   <div className="flex items-center justify-center size-9 rounded-xl bg-white/15 backdrop-blur-sm">
@@ -172,11 +172,9 @@ function Dashboard() {
                     <p className="text-xs text-primary-foreground/60">ICAI-trained</p>
                   </div>
                 </div>
-
                 <p className="text-primary-foreground/80 text-sm leading-relaxed flex-1">
                   Cites Companies Act, GST, Ind AS, and SA standards precisely — just like your ICAI module would.
                 </p>
-
                 <div className="mt-5 pt-4 border-t border-white/15">
                   <div className="flex items-start gap-2">
                     <Zap className="size-3.5 text-gold mt-0.5 flex-shrink-0" />
@@ -188,43 +186,52 @@ function Dashboard() {
           </motion.div>
         </div>
 
+        {/* ── Exam Countdown ── */}
+        {upcomingExams.length > 0 && (
+          <motion.div {...fadeUp(0.24)}>
+            <div className="flex items-center gap-3 mb-4">
+              <h2 className="font-display text-2xl text-foreground">Exam Countdown</h2>
+              <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {upcomingExams.map((exam) => (
+                <div key={exam.label} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${exam.color} p-5 shadow-lg ${exam.shadow}`}>
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl translate-x-8 -translate-y-8 pointer-events-none" />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Calendar className="size-4 text-white/80" />
+                      <span className="text-xs font-semibold text-white/80 uppercase tracking-wider">{exam.label}</span>
+                    </div>
+                    <div className="flex items-end gap-2">
+                      <span className="font-display text-5xl text-white tabular-nums leading-none">{exam.days}</span>
+                      <span className="text-white/70 text-sm font-medium mb-1">days left</span>
+                    </div>
+                    <p className="text-white/60 text-xs mt-2">
+                      {exam.date.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         {/* ── Quick Actions ── */}
         <motion.div {...fadeUp(0.26)}>
           <div className="flex items-center gap-3 mb-5">
             <h2 className="font-display text-2xl text-foreground">Quick Actions</h2>
             <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              {
-                to: "/doubts",
-                icon: MessageSquare,
-                label: "Ask AI Teacher",
-                sub: "Get instant answers",
-                iconBg: "bg-primary/10",
-                iconColor: "text-primary",
-                hoverBorder: "hover:border-primary/30 hover:bg-primary/3",
-              },
-              {
-                to: "/syllabus",
-                icon: PlayCircle,
-                label: "Resume Study",
-                sub: "Continue your syllabus",
-                iconBg: "bg-emerald-500/10",
-                iconColor: "text-emerald-500",
-                hoverBorder: "hover:border-emerald-500/30 hover:bg-emerald-500/3",
-              },
-              {
-                to: "/past-questions",
-                icon: BookOpen,
-                label: "Practice Questions",
-                sub: "Past exam papers",
-                iconBg: "bg-amber-500/10",
-                iconColor: "text-amber-500",
-                hoverBorder: "hover:border-amber-500/30 hover:bg-amber-500/3",
-              },
-            ].map((item, i) => (
+              { to: "/doubts", icon: MessageSquare, label: "Ask AI Teacher", sub: "Get instant answers", iconBg: "bg-primary/10", iconColor: "text-primary", hoverBorder: "hover:border-primary/30 hover:bg-primary/3" },
+              { to: "/syllabus", icon: PlayCircle, label: "Resume Study", sub: "Continue your syllabus", iconBg: "bg-emerald-500/10", iconColor: "text-emerald-500", hoverBorder: "hover:border-emerald-500/30 hover:bg-emerald-500/3" },
+              { to: "/past-questions", icon: BookOpen, label: "Practice Questions", sub: "Past exam papers", iconBg: "bg-amber-500/10", iconColor: "text-amber-500", hoverBorder: "hover:border-amber-500/30 hover:bg-amber-500/3" },
+              { to: "/mock-test", icon: ClipboardList, label: "Mock Test", sub: "Timed self-assessment", iconBg: "bg-purple-500/10", iconColor: "text-purple-500", hoverBorder: "hover:border-purple-500/30 hover:bg-purple-500/3" },
+              { to: "/bookmarks", icon: Bookmark, label: "Bookmarks", sub: "Saved questions & topics", iconBg: "bg-pink-500/10", iconColor: "text-pink-500", hoverBorder: "hover:border-pink-500/30 hover:bg-pink-500/3" },
+              { to: "/formula-sheets", icon: FileText, label: "Formula Sheets", sub: "Quick revision", iconBg: "bg-cyan-500/10", iconColor: "text-cyan-500", hoverBorder: "hover:border-cyan-500/30 hover:bg-cyan-500/3" },
+              { to: "/streaks", icon: Flame, label: "Study Streak", sub: "Daily consistency", iconBg: "bg-orange-500/10", iconColor: "text-orange-500", hoverBorder: "hover:border-orange-500/30 hover:bg-orange-500/3" },
+            ].map((item) => (
               <Link key={item.to} to={item.to}>
                 <motion.div
                   whileHover={{ y: -3 }}
