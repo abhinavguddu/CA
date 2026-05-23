@@ -1,9 +1,5 @@
 {
-  "cleanUrls": true,
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/"
-    }
-  ]
+  "buildCommand": "vite build",
+  "outputDirectory": ".vercel/output",
+  "framework": null
 }
