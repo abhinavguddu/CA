@@ -55,7 +55,7 @@ function Dashboard() {
   if (hour < 12) greeting = "Good morning";
   else if (hour < 17) greeting = "Good afternoon";
 
-  const firstName = user?.user_metadata?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "Student";
+  const firstName = (user?.user_metadata?.display_name || user?.user_metadata?.full_name)?.split(" ")[0] || "Student";
 
   const motivationalQuotes = [
     "Every expert was once a beginner. Keep going!",
