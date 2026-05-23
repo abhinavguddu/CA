@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { MessageSquare, BookOpen, Sparkles, ArrowRight, PlayCircle, Trophy, TrendingUp, Zap, Star, ClipboardList, Bookmark, FileText, Flame, Calendar } from "lucide-react";
-import { motion } from "framer-motion";
+import { MessageSquare, BookOpen, Sparkles, ArrowRight, PlayCircle, Trophy, TrendingUp, Zap, Star, ClipboardList, Bookmark, FileText, Flame, Calendar, Pencil, Check, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({ component: Dashboard });
 
@@ -14,11 +14,21 @@ const fadeUp = (delay = 0) => ({
   transition: { delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
 });
 
-const CA_EXAMS = [
-  { label: "CA Foundation", date: new Date("2026-06-01"), color: "from-emerald-500 to-teal-500", shadow: "shadow-emerald-500/20" },
-  { label: "CA Intermediate", date: new Date("2026-05-03"), color: "from-blue-500 to-indigo-500", shadow: "shadow-blue-500/20" },
-  { label: "CA Final", date: new Date("2026-05-03"), color: "from-violet-500 to-purple-500", shadow: "shadow-violet-500/20" },
+const DEFAULT_EXAMS = [
+  { label: "CA Foundation", date: "2026-06-01", color: "from-emerald-500 to-teal-500", shadow: "shadow-emerald-500/20" },
+  { label: "CA Intermediate", date: "2026-05-03", color: "from-blue-500 to-indigo-500", shadow: "shadow-blue-500/20" },
+  { label: "CA Final", date: "2026-05-03", color: "from-violet-500 to-purple-500", shadow: "shadow-violet-500/20" },
 ];
+
+const LS_KEY = "ca_exam_dates";
+
+function loadExamDates() {
+  try {
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved) return JSON.parse(saved) as { label: string; date: string }[];
+  } catch {}
+  return DEFAULT_EXAMS.map(({ label, date }) => ({ label, date }));
+}
 
 function Dashboard() {
   const { user } = useAuth();
@@ -60,8 +70,20 @@ function Dashboard() {
     return () => clearInterval(t);
   }, []);
 
+  const [examDates, setExamDates] = useState(() => loadExamDates());
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(examDates);
+
+  function saveExamDates() {
+    setExamDates(draft);
+    localStorage.setItem(LS_KEY, JSON.stringify(draft));
+    setEditing(false);
+  }
+
+  const CA_EXAMS = DEFAULT_EXAMS.map((e, i) => ({ ...e, date: examDates[i]?.date ?? e.date }));
+
   const upcomingExams = CA_EXAMS.map((e) => {
-    const days = Math.ceil((e.date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const days = Math.ceil((new Date(e.date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     return { ...e, days };
   }).filter((e) => e.days > 0).sort((a, b) => a.days - b.days);
 
@@ -187,32 +209,75 @@ function Dashboard() {
         </div>
 
         {/* ── Exam Countdown ── */}
-        {upcomingExams.length > 0 && (
+        {(upcomingExams.length > 0 || editing) && (
           <motion.div {...fadeUp(0.24)}>
             <div className="flex items-center gap-3 mb-4">
               <h2 className="font-display text-2xl text-foreground">Exam Countdown</h2>
               <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {upcomingExams.map((exam) => (
-                <div key={exam.label} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${exam.color} p-5 shadow-lg ${exam.shadow}`}>
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl translate-x-8 -translate-y-8 pointer-events-none" />
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Calendar className="size-4 text-white/80" />
-                      <span className="text-xs font-semibold text-white/80 uppercase tracking-wider">{exam.label}</span>
-                    </div>
-                    <div className="flex items-end gap-2">
-                      <span className="font-display text-5xl text-white tabular-nums leading-none">{exam.days}</span>
-                      <span className="text-white/70 text-sm font-medium mb-1">days left</span>
-                    </div>
-                    <p className="text-white/60 text-xs mt-2">
-                      {exam.date.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
-                    </p>
-                  </div>
+              {!editing ? (
+                <button onClick={() => { setDraft(examDates); setEditing(true); }} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-primary/8">
+                  <Pencil className="size-3.5" /> Edit dates
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button onClick={saveExamDates} className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 hover:text-emerald-700 px-3 py-1.5 rounded-lg hover:bg-emerald-50 transition-colors">
+                    <Check className="size-3.5" /> Save
+                  </button>
+                  <button onClick={() => setEditing(false)} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive px-3 py-1.5 rounded-lg hover:bg-destructive/8 transition-colors">
+                    <X className="size-3.5" /> Cancel
+                  </button>
                 </div>
-              ))}
+              )}
             </div>
+
+            <AnimatePresence mode="wait">
+              {editing ? (
+                <motion.div key="edit" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {DEFAULT_EXAMS.map((exam, i) => (
+                    <div key={exam.label} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${exam.color} p-5 shadow-lg ${exam.shadow}`}>
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl translate-x-8 -translate-y-8 pointer-events-none" />
+                      <div className="relative z-10 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="size-4 text-white/80" />
+                          <span className="text-xs font-semibold text-white/80 uppercase tracking-wider">{exam.label}</span>
+                        </div>
+                        <input
+                          type="date"
+                          value={draft[i]?.date ?? exam.date}
+                          onChange={(e) => {
+                            const updated = [...draft];
+                            updated[i] = { ...updated[i], label: exam.label, date: e.target.value };
+                            setDraft(updated);
+                          }}
+                          className="w-full rounded-xl bg-white/20 border border-white/30 text-white text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 [color-scheme:dark]"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div key="view" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {upcomingExams.map((exam) => (
+                    <div key={exam.label} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${exam.color} p-5 shadow-lg ${exam.shadow}`}>
+                      <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-2xl translate-x-8 -translate-y-8 pointer-events-none" />
+                      <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Calendar className="size-4 text-white/80" />
+                          <span className="text-xs font-semibold text-white/80 uppercase tracking-wider">{exam.label}</span>
+                        </div>
+                        <div className="flex items-end gap-2">
+                          <span className="font-display text-5xl text-white tabular-nums leading-none">{exam.days}</span>
+                          <span className="text-white/70 text-sm font-medium mb-1">days left</span>
+                        </div>
+                        <p className="text-white/60 text-xs mt-2">
+                          {new Date(exam.date).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
 
