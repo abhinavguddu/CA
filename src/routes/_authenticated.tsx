@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Footer } from "@/components/Footer";
 
 export const Route = createFileRoute("/_authenticated")({ component: Layout });
 
@@ -214,6 +215,7 @@ function Layout() {
       {/* Main Content */}
       <main className="md:pl-64 min-h-screen flex flex-col">
         <Outlet />
+        <Footer />
       </main>
     </div>
   );

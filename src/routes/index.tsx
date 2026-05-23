@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Sparkles, BookOpen, MessageSquare, Target, GraduationCap, ArrowRight } from "lucide-react";
+import { Sparkles, BookOpen, MessageSquare, Target, GraduationCap, ArrowRight, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
+
+import { Footer } from "@/components/Footer";
 
 export const Route = createFileRoute("/")({ component: Landing });
 
@@ -118,14 +120,7 @@ function Landing() {
         </section>
       </main>
 
-      <footer className="relative border-t border-border/30 bg-background/50 backdrop-blur-md py-10 text-center text-sm text-muted-foreground z-10">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <GraduationCap className="size-4 opacity-50" />
-          <span className="font-display text-lg opacity-80">CA Mentor</span>
-        </div>
-        <p>© {new Date().getFullYear()} CA Mentor · Not affiliated with ICAI</p>
-      </footer>
+      <Footer />
     </div>
   );
 }
