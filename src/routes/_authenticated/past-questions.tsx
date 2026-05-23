@@ -142,7 +142,7 @@ function PastQuestionsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 p-6 md:p-10 mesh-bg min-h-full">
+    <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-10 mesh-bg min-h-full">
       <motion.header initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-4xl md:text-5xl tracking-tight mb-2">Past Exam Questions</h1>
@@ -160,10 +160,10 @@ function PastQuestionsPage() {
             <div className="p-2 rounded-lg bg-[var(--gold)]/20 text-[var(--gold)]">
               <BookMarked className="size-5" />
             </div>
-            <h2 className="font-display text-2xl">ICAI Suggested Answers — Intermediate (Jan 2026)</h2>
+            <h2 className="font-display text-lg sm:text-2xl">ICAI Suggested Answers — Intermediate (Jan 2026)</h2>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8 relative z-10">
+          <div className="grid sm:grid-cols-2 gap-6 relative z-10">
             <div className="space-y-4">
               <h3 className="font-semibold text-primary flex items-center gap-2 border-b border-border/50 pb-2">Group I</h3>
               <ul className="space-y-3 text-sm">
@@ -229,14 +229,14 @@ function PastQuestionsPage() {
         </Card>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex items-center justify-between">
-        <Tabs value={view} onValueChange={(v) => setView(v as any)} className="w-[400px]">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex items-center justify-between gap-3">
+        <Tabs value={view} onValueChange={(v) => setView(v as any)} className="w-full max-w-xs">
           <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1">
-            <TabsTrigger value="subject" className="rounded-md">By Subject</TabsTrigger>
-            <TabsTrigger value="grid" className="rounded-md">All Questions</TabsTrigger>
+            <TabsTrigger value="subject" className="rounded-md text-xs sm:text-sm">By Subject</TabsTrigger>
+            <TabsTrigger value="grid" className="rounded-md text-xs sm:text-sm">All Questions</TabsTrigger>
           </TabsList>
         </Tabs>
-        <span className="text-sm font-medium px-3 py-1 bg-primary/10 text-primary rounded-full">{questions?.length ?? 0} found</span>
+        <span className="text-xs sm:text-sm font-medium px-3 py-1 bg-primary/10 text-primary rounded-full whitespace-nowrap">{questions?.length ?? 0} found</span>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
@@ -285,23 +285,23 @@ function PastQuestionsPage() {
       </motion.div>
 
       <Dialog open={!!activeId} onOpenChange={(o) => { if (!o) setActiveId(null); }}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden border-0 bg-background shadow-2xl rounded-3xl">
+        <DialogContent className="max-w-4xl w-[95vw] p-0 overflow-hidden border-0 bg-background shadow-2xl rounded-2xl">
           {active && (
-            <div className="flex flex-col h-[85vh] max-h-[800px]">
-              <DialogHeader className="p-6 border-b border-border/50 bg-muted/20">
-                <DialogTitle className="font-display text-2xl">
-                  <span className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col h-[90vh] max-h-[800px]">
+              <DialogHeader className="p-4 md:p-6 border-b border-border/50 bg-muted/20">
+                <DialogTitle className="font-display text-lg md:text-2xl">
+                  <span className="flex flex-wrap items-center gap-2">
                     <div className="p-2 rounded-lg bg-gold/10 text-gold">
-                      <BookMarked className="size-5" />
+                      <BookMarked className="size-4" />
                     </div>
                     {active.exam_month} {active.exam_year}
-                    {active.paper && <span className="text-muted-foreground font-sans text-lg font-normal">· {active.paper}</span>}
+                    {active.paper && <span className="text-muted-foreground font-sans text-base font-normal">· {active.paper}</span>}
                     {active.marks && <Badge className="ml-auto bg-gold/20 text-gold border-gold/30">{active.marks} marks</Badge>}
                   </span>
                 </DialogTitle>
               </DialogHeader>
               
-              <ScrollArea className="flex-1 p-6">
+              <ScrollArea className="flex-1 p-4 md:p-6">
                 <div className="space-y-8 pb-10">
                   <div className="rounded-2xl border border-border bg-card shadow-sm p-6 relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
@@ -310,15 +310,15 @@ function PastQuestionsPage() {
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between mb-4 gap-2">
+                      <div className="flex items-center gap-2">
                         <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                          <Sparkles className="size-5" />
+                          <Sparkles className="size-4" />
                         </div>
-                        <h3 className="font-display text-2xl tracking-tight">AI Model Answer</h3>
+                        <h3 className="font-display text-lg md:text-2xl tracking-tight">AI Model Answer</h3>
                       </div>
-                      <Button size="sm" variant="outline" onClick={regenerate} disabled={answerQuery.isFetching} className="h-9 rounded-lg">
-                        <RefreshCw className={`mr-2 size-3.5 ${answerQuery.isFetching ? "animate-spin" : ""}`} /> Regenerate
+                      <Button size="sm" variant="outline" onClick={regenerate} disabled={answerQuery.isFetching} className="h-8 rounded-lg text-xs shrink-0">
+                        <RefreshCw className={`mr-1.5 size-3 ${answerQuery.isFetching ? "animate-spin" : ""}`} /> Regenerate
                       </Button>
                     </div>
 
