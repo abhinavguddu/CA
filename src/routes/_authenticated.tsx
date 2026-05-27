@@ -17,6 +17,10 @@ import {
   Bookmark,
   FileText,
   Flame,
+  CalendarDays,
+  Layers,
+  BarChart3,
+  Zap,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Footer } from "@/components/Footer";
@@ -58,6 +62,10 @@ function Layout() {
 
   const links = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", color: "text-emerald-400" },
+    { to: "/planner", icon: CalendarDays, label: "Study Planner", color: "text-indigo-400" },
+    { to: "/flashcards", icon: Layers, label: "Flash Cards", color: "text-amber-400" },
+    { to: "/analytics", icon: BarChart3, label: "Analytics", color: "text-blue-400" },
+    { to: "/revision", icon: Zap, label: "Quick Revision", color: "text-rose-400" },
     { to: "/doubts", icon: MessageSquare, label: "Ask Doubts", color: "text-blue-400" },
     { to: "/syllabus", icon: BookOpen, label: "Syllabus", color: "text-violet-400" },
     { to: "/past-questions", icon: FileQuestion, label: "Past Questions", color: "text-amber-400" },
@@ -97,7 +105,7 @@ function Layout() {
       </div>
 
       {/* Nav Links */}
-      <nav className="flex-1 px-3 space-y-1">
+      <nav className="flex-1 px-3 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent pb-4">
         {links.map((l) => {
           const active = loc.pathname === l.to || loc.pathname.startsWith(l.to + "/");
           return (

@@ -1,396 +1,318 @@
 -- ============================================================
--- CA Formula Sheets Seed Data
--- Run this in Supabase SQL Editor
+-- CA Formula Sheets Seed — with KaTeX math syntax
+-- Run in Supabase SQL Editor
 -- ============================================================
-
--- Helper: get subject id by name (returns null if not found)
--- We use a DO block so it works even if some subjects don't exist
-
 DO $$
-DECLARE
-  sid uuid;
+DECLARE sid uuid;
 BEGIN
 
 -- ── FOUNDATION ──────────────────────────────────────────────
 
--- Maths & Statistics
 SELECT id INTO sid FROM public.subjects WHERE name ILIKE '%mathematics%' AND level = 'Foundation' LIMIT 1;
 IF sid IS NOT NULL THEN
-  INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Maths — Key Formulas', $MD$
-## Arithmetic Progressions
-- **nth term:** aₙ = a + (n−1)d
-- **Sum of n terms:** Sₙ = n/2 × [2a + (n−1)d]
+INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Maths — Progressions & Interest', $MD$
+## Arithmetic Progression
+- **nth Term** = $a_n = a + (n-1)d$
+- **Sum of n Terms** = $S_n = \dfrac{n}{2}[2a + (n-1)d]$
+- **Sum (first & last)** = $S_n = \dfrac{n}{2}(a + l)$
 
-## Geometric Progressions
-- **nth term:** aₙ = arⁿ⁻¹
-- **Sum of n terms:** Sₙ = a(rⁿ−1)/(r−1) when r ≠ 1
+## Geometric Progression
+- **nth Term** = $a_n = ar^{n-1}$
+- **Sum of n Terms** = $S_n = \dfrac{a(r^n - 1)}{r - 1}$ when $r \neq 1$
+- **Sum to Infinity** = $S_\infty = \dfrac{a}{1-r}$ when $|r| < 1$
 
 ## Simple & Compound Interest
-- **SI** = P × R × T / 100
-- **CI** = P[(1 + R/100)ⁿ − 1]
-- **Effective Rate** = (1 + r/m)ᵐ − 1
+- **Simple Interest** = $SI = \dfrac{P \times R \times T}{100}$
+- **Compound Interest** = $CI = P\left[\left(1 + \dfrac{R}{100}\right)^n - 1\right]$
+- **Effective Annual Rate** = $EAR = \left(1 + \dfrac{r}{m}\right)^m - 1$
 
 ## Permutations & Combinations
-- **nPr** = n! / (n−r)!
-- **nCr** = n! / [r!(n−r)!]
-- **nCr = nC(n−r)**
-
-## Sets
-- **n(A∪B)** = n(A) + n(B) − n(A∩B)
-- **n(A∪B∪C)** = n(A)+n(B)+n(C) − n(A∩B) − n(B∩C) − n(A∩C) + n(A∩B∩C)
+- **Permutation** = $^nP_r = \dfrac{n!}{(n-r)!}$
+- **Combination** = $^nC_r = \dfrac{n!}{r!(n-r)!}$
+- **Symmetry** = $^nC_r = ^nC_{n-r}$
 
 ## Quadratic Equation
-- **Roots:** x = [−b ± √(b²−4ac)] / 2a
-- **Sum of roots** = −b/a | **Product of roots** = c/a
+- **Roots** = $x = \dfrac{-b \pm \sqrt{b^2 - 4ac}}{2a}$
+- **Sum of Roots** = $\alpha + \beta = \dfrac{-b}{a}$
+- **Product of Roots** = $\alpha \cdot \beta = \dfrac{c}{a}$
 
-> **Exam tip:** Always check if the question asks for SI or CI — a common mistake is mixing them up.
+> Exam tip: In compound interest, always check if compounding is annual, half-yearly, or quarterly — adjust n and r accordingly.
 $MD$);
 END IF;
 
--- Accounts (Foundation)
 SELECT id INTO sid FROM public.subjects WHERE name ILIKE '%accounting%' AND level = 'Foundation' LIMIT 1;
 IF sid IS NOT NULL THEN
-  INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Accounting — Key Concepts & Entries', $MD$
+INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Accounts — Depreciation & Adjustments', $MD$
 ## Accounting Equation
-**Assets = Liabilities + Capital**
-
-## Important Journal Entries
-| Transaction | Debit | Credit |
-|---|---|---|
-| Purchase of goods (cash) | Purchases A/c | Cash A/c |
-| Sales (credit) | Debtor A/c | Sales A/c |
-| Depreciation | Depreciation A/c | Asset A/c |
-| Bad debt | Bad Debt A/c | Debtor A/c |
-| Interest on capital | Interest on Capital A/c | Capital A/c |
+- **Fundamental** = $\text{Assets} = \text{Liabilities} + \text{Capital}$
 
 ## Depreciation
-- **SLM:** (Cost − Scrap) / Useful Life
-- **WDV:** Book Value × Rate%
-
-## Rectification of Errors
-- **Errors of Omission** — completely omitted, both sides affected equally
-- **Errors of Commission** — wrong amount, wrong account
-- **Compensating Errors** — two errors cancel each other
+- **SLM Annual Charge** = $\dfrac{\text{Cost} - \text{Scrap Value}}{\text{Useful Life (years)}}$
+- **SLM Rate** = $\dfrac{100}{\text{Useful Life}} \%$
+- **WDV Charge** = $\text{Book Value} \times \text{Rate\%}$
+- **WDV Rate** = $\left[1 - \left(\dfrac{S}{C}\right)^{1/n}\right] \times 100$
 
 ## Final Accounts Adjustments
-- Outstanding expense → Add to expense + Show as liability
-- Prepaid expense → Deduct from expense + Show as asset
-- Accrued income → Add to income + Show as asset
-- Unearned income → Deduct from income + Show as liability
+| Adjustment | P&L Effect | Balance Sheet |
+|---|---|---|
+| Outstanding Expense | Add to expense | Current Liability |
+| Prepaid Expense | Deduct from expense | Current Asset |
+| Accrued Income | Add to income | Current Asset |
+| Unearned Income | Deduct from income | Current Liability |
+| Bad Debt | Debit P&L | Reduce Debtors |
+| Provision for Bad Debt | Debit P&L | Deduct from Debtors |
 
-> **Exam tip:** In rectification, always identify whether the error affects one side or both sides of the trial balance.
+> Exam tip: Closing stock appears in both Trading A/c (credit) and Balance Sheet (asset) — never in P&L directly.
 $MD$);
 END IF;
 
 -- ── INTERMEDIATE ────────────────────────────────────────────
 
--- Advanced Accounting
 SELECT id INTO sid FROM public.subjects WHERE name ILIKE '%advanced accounting%' AND level = 'Intermediate' LIMIT 1;
 IF sid IS NOT NULL THEN
-  INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Advanced Accounting — Depreciation & Amalgamation', $MD$
-## AS 10 — Property, Plant & Equipment
-- **Depreciable Amount** = Cost − Residual Value
-- **SLM Rate** = 100 / Useful Life
-- **WDV Rate** = 1 − (Residual Value / Cost)^(1/n)
+INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Partnership — Goodwill & Ratios', $MD$
+## Goodwill Valuation
+- **Average Profit** = $\dfrac{\text{Total Adjusted Profits}}{\text{Number of Years}}$
+- **Super Profit** = $\text{Actual Profit} - \text{Normal Profit}$
+- **Normal Profit** = $\text{Capital Employed} \times \dfrac{\text{Normal Rate}}{100}$
+- **Goodwill (Super Profit)** = $\text{Super Profit} \times \text{Years of Purchase}$
+- **Goodwill (Capitalisation)** = $\dfrac{\text{Super Profit}}{\text{Normal Rate}} \times 100$
 
-## AS 14 — Amalgamation
-### Purchase Consideration
-- **Net Assets Method:** Assets taken over − Liabilities taken over
-- **Intrinsic Value Method:** Net Assets / No. of shares
+## Profit Sharing Ratios
+- **Sacrificing Ratio** = $\text{Old Ratio} - \text{New Ratio}$
+- **Gaining Ratio** = $\text{New Ratio} - \text{Old Ratio}$
 
-### Goodwill / Capital Reserve
-- **Goodwill** = Purchase Consideration > Net Assets
-- **Capital Reserve** = Net Assets > Purchase Consideration
+## Amalgamation (AS 14)
+- **Purchase Consideration (Net Assets)** = $\text{Assets Taken} - \text{Liabilities Taken}$
+- **Goodwill** = $\text{PC} > \text{Net Assets}$
+- **Capital Reserve** = $\text{Net Assets} > \text{PC}$
 
-### Types
-| Type | Treatment |
-|---|---|
-| Amalgamation in nature of merger | Pooling of interests method |
-| Amalgamation in nature of purchase | Purchase method |
-
-## AS 4 — Contingencies
-- **Provision** → probable + reliably estimable → recognise
-- **Contingent Liability** → possible → disclose only
-- **Contingent Asset** → virtually certain → recognise
-
-> **Exam tip:** In amalgamation questions, always calculate purchase consideration first, then compare with net assets to find goodwill/capital reserve.
+> Exam tip: Always prepare Revaluation A/c and Partners' Capital A/c in columnar format — it earns presentation marks.
 $MD$);
 
-  INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Advanced Accounting — Partnership', $MD$
-## Goodwill Valuation
-- **Average Profit Method:** Goodwill = Average Profit × Years of Purchase
-- **Super Profit Method:** Goodwill = Super Profit × Years of Purchase
-  - Super Profit = Actual Profit − Normal Profit
-  - Normal Profit = Capital Employed × Normal Rate / 100
-- **Capitalisation Method:** Goodwill = Super Profit / Normal Rate × 100
+INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'AS Standards — Key Formulas', $MD$
+## AS 2 — Inventories
+- **Cost of Inventory** = $\text{Purchase Cost} + \text{Conversion Cost} + \text{Other Costs}$
+- **NRV** = $\text{Est. Selling Price} - \text{Est. Completion Cost} - \text{Selling Cost}$
+- **Measurement** = $\min(\text{Cost},\ \text{NRV})$
 
-## Admission of Partner
-1. Calculate new profit sharing ratio
-2. Calculate sacrificing ratio = Old ratio − New ratio
-3. Revalue assets & liabilities
-4. Distribute accumulated profits/losses
-5. Adjust goodwill
+## AS 10 — PPE
+- **Depreciable Amount** = $\text{Cost} - \text{Residual Value}$
+- **WDV Rate** = $\left[1 - \left(\dfrac{RV}{C}\right)^{1/n}\right] \times 100$
 
-## Retirement / Death
-- **Gaining Ratio** = New ratio − Old ratio
-- Goodwill credited to retiring partner in gaining ratio
+## AS 22 — Deferred Tax
+- **Deferred Tax Asset/Liability** = $\text{Timing Difference} \times \text{Tax Rate}$
+- **DTA** → when book profit < taxable profit
+- **DTL** → when book profit > taxable profit
 
-## Dissolution
-- **Garner vs Murray Rule:** Insolvent partner's deficiency borne by solvent partners in capital ratio
-
-> **Exam tip:** Always prepare Revaluation A/c and Partners' Capital A/c in columnar format for full presentation marks.
+> Exam tip: AS 22 DTA is recognised only when there is virtual certainty of future taxable profits.
 $MD$);
 END IF;
 
--- Taxation
 SELECT id INTO sid FROM public.subjects WHERE name ILIKE '%taxation%' AND level = 'Intermediate' LIMIT 1;
 IF sid IS NOT NULL THEN
-  INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Income Tax — Key Provisions', $MD$
-## Heads of Income (Sec 14)
-1. Salaries
-2. House Property
-3. Profits & Gains of Business/Profession
-4. Capital Gains
-5. Other Sources
+INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Income Tax — Salary & House Property', $MD$
+## Salary Income
+- **Gross Salary** = $\text{Basic} + \text{DA} + \text{HRA} + \text{Allowances} + \text{Perquisites}$
+- **Standard Deduction** = $₹75{,}000$ (AY 2025-26)
 
-## Salary (Sec 15–17)
-- **HRA Exemption** [Sec 10(13A)] = Least of:
-  - Actual HRA received
-  - 50%/40% of Basic Salary (Metro/Non-metro)
-  - Rent paid − 10% of Basic Salary
-- **Standard Deduction** = ₹75,000 (AY 2025-26)
+## HRA Exemption [Sec 10(13A)]
+Exempt = $\min$ of:
+1. $\text{Actual HRA received}$
+2. $50\%\ \text{or}\ 40\%\ \text{of Basic+DA}$ (Metro / Non-metro)
+3. $\text{Rent Paid} - 10\%\ \text{of Basic+DA}$
 
-## House Property (Sec 22–27)
-- **NAV** = GAV − Municipal Taxes paid by owner
-- **GAV** = Higher of Expected Rent or Actual Rent
-- **Deductions u/s 24:**
-  - 30% of NAV (standard)
-  - Interest on borrowed capital (actual, max ₹2L for self-occupied)
+## House Property
+- **GAV** = $\max(\text{Expected Rent},\ \text{Actual Rent})$
+- **NAV** = $\text{GAV} - \text{Municipal Tax paid by owner}$
+- **Deduction u/s 24(a)** = $30\%\ \text{of NAV}$
+- **Deduction u/s 24(b)** = $\text{Interest on loan}$ (max $₹2L$ for self-occupied)
+- **Taxable HP Income** = $\text{NAV} - \text{Deductions u/s 24}$
 
 ## Capital Gains
-- **STCG** = Sale Price − Cost − Transfer Expenses
-- **LTCG** = Sale Price − Indexed Cost − Transfer Expenses
-- **Indexed Cost** = Actual Cost × (CII of sale year / CII of purchase year)
+- **STCG** = $\text{Sale Price} - \text{Cost} - \text{Transfer Expenses}$
+- **LTCG** = $\text{Sale Price} - \text{Indexed Cost} - \text{Transfer Expenses}$
+- **Indexed Cost** = $\text{Actual Cost} \times \dfrac{\text{CII (Sale Year)}}{\text{CII (Purchase Year)}}$
 
-## Set Off & Carry Forward
-| Loss | Can be set off against | Carry forward |
-|---|---|---|
-| House Property | Any head | 8 years |
-| Business Loss | Business income only | 8 years |
-| Speculation Loss | Speculation profit only | 4 years |
-| LTCL | LTCG only | 8 years |
-
-> **Exam tip:** For HRA, always check metro/non-metro status. Delhi, Mumbai, Chennai, Kolkata = Metro (50%).
+> Exam tip: Metro cities for HRA = Delhi, Mumbai, Chennai, Kolkata → 50%. All others → 40%.
 $MD$);
 
-  INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'GST — Key Concepts', $MD$
-## GST Rates
-| Category | Rate |
-|---|---|
-| Essential goods | 0% / 5% |
-| Standard goods | 12% / 18% |
-| Luxury / demerit goods | 28% |
+INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'GST — Registration, ITC & Returns', $MD$
+## GST Rate Structure
+| Category | CGST | SGST | Total |
+|---|---|---|---|
+| Essential goods | 0% | 0% | 0% |
+| Basic goods | 2.5% | 2.5% | 5% |
+| Standard goods | 6% | 6% | 12% |
+| Most goods/services | 9% | 9% | 18% |
+| Luxury/demerit | 14% | 14% | 28% |
 
-## Input Tax Credit (ITC) — Sec 16
-**Conditions:**
-1. Registered person
-2. Tax invoice available
-3. Goods/services received
-4. Tax actually paid by supplier
-5. Return filed (GSTR-3B)
+## Registration Threshold
+- **Goods** = $₹40\ \text{lakh}$ (₹20L for special category states)
+- **Services** = $₹20\ \text{lakh}$ (₹10L for special category states)
 
-**Blocked Credits (Sec 17(5)):**
-- Motor vehicles (except specific use)
-- Food, beverages, outdoor catering
-- Club membership, health services
-- Works contract for immovable property
+## Input Tax Credit
+- **ITC Available** = $\text{Tax on Inputs} - \text{Blocked Credits}$
+- **Reversal (Rule 42)** = $\dfrac{\text{Common Credit} \times \text{Exempt Turnover}}{\text{Total Turnover}}$
 
-## Time of Supply
-- **Goods:** Earlier of — invoice date OR receipt of payment
-- **Services:** Earlier of — invoice date (within 30 days) OR receipt of payment
+## Time of Supply — Goods
+$$\text{TOS} = \min(\text{Invoice Date},\ \text{Receipt of Payment})$$
 
-## Place of Supply
-- **Goods:** Location where goods delivered
-- **Services (general):** Location of recipient
+## Composition Levy
+- **Manufacturer/Trader** = $1\%$ of turnover
+- **Restaurant** = $5\%$ of turnover
+- **Limit** = $₹1.5\ \text{crore}$
 
-## Composition Scheme (Sec 10)
-- Turnover limit: ₹1.5 crore (₹75L for special category states)
-- Cannot claim ITC
-- Cannot make inter-state supply
-
-> **Exam tip:** ITC blocked credits (Sec 17(5)) is a very frequently tested area — memorise the list.
+> Exam tip: Blocked credits u/s 17(5) — motor vehicles, food, club membership, works contract for immovable property. Memorise this list.
 $MD$);
 END IF;
 
--- Costing
 SELECT id INTO sid FROM public.subjects WHERE name ILIKE '%cost%' AND level = 'Intermediate' LIMIT 1;
 IF sid IS NOT NULL THEN
-  INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Cost Accounting — Key Formulas', $MD$
-## Cost Sheet Format
+INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Costing — Material, Labour & Overhead', $MD$
+## Cost Sheet Structure
 ```
-Prime Cost = DM + DL + Direct Expenses
-Works Cost = Prime Cost + Factory Overhead
-Cost of Production = Works Cost + Admin Overhead
-Cost of Goods Sold = Cost of Production + Opening FG − Closing FG
-Total Cost / Cost of Sales = COGS + Selling & Distribution Overhead
-Profit = Sales − Total Cost
+Prime Cost          = Direct Material + Direct Labour + Direct Expenses
+Works/Factory Cost  = Prime Cost + Factory Overhead
+Cost of Production  = Works Cost + Admin & Office Overhead
+Cost of Goods Sold  = Cost of Production + Opening FG − Closing FG
+Total Cost          = COGS + Selling & Distribution Overhead
+Profit              = Sales − Total Cost
 ```
 
-## Material
-- **EOQ** = √(2 × Annual Demand × Ordering Cost / Carrying Cost per unit)
-- **Reorder Level** = Max Consumption × Max Lead Time
-- **Min Level** = Reorder Level − (Normal Consumption × Normal Lead Time)
-- **Max Level** = Reorder Level + EOQ − (Min Consumption × Min Lead Time)
+## Material Management
+- **EOQ** = $\sqrt{\dfrac{2 \times D \times O}{C}}$
+  where D = Annual Demand, O = Ordering Cost, C = Carrying Cost per unit
+- **Reorder Level** = $\text{Max Consumption} \times \text{Max Lead Time}$
+- **Minimum Level** = $\text{ROL} - (\text{Normal Consumption} \times \text{Normal Lead Time})$
+- **Maximum Level** = $\text{ROL} + \text{EOQ} - (\text{Min Consumption} \times \text{Min Lead Time})$
 
-## Labour
-- **Piece Rate Earnings** = Units produced × Rate per unit
-- **Halsey Premium** = 50% × (Time Saved × Hourly Rate)
-- **Rowan Premium** = (Time Saved / Time Allowed) × Time Taken × Hourly Rate
-- **Labour Turnover** = (Separations / Avg Workers) × 100
-
-## Overhead Absorption
-- **Blanket Rate** = Total Overhead / Total Base
-- **Departmental Rate** = Dept Overhead / Dept Base
-- **Machine Hour Rate** = Dept Overhead / Machine Hours
+## Labour Incentives
+- **Halsey Premium** = $50\% \times \text{Time Saved} \times \text{Hourly Rate}$
+- **Rowan Premium** = $\dfrac{\text{Time Saved}}{\text{Time Allowed}} \times \text{Time Taken} \times \text{Hourly Rate}$
+- **Labour Turnover** = $\dfrac{\text{Separations}}{\text{Average Workers}} \times 100$
 
 ## Marginal Costing
-- **Contribution** = Sales − Variable Cost
-- **P/V Ratio** = Contribution / Sales × 100
-- **BEP (Units)** = Fixed Cost / Contribution per unit
-- **BEP (₹)** = Fixed Cost / P/V Ratio
-- **Margin of Safety** = Actual Sales − BEP Sales
+- **Contribution** = $\text{Sales} - \text{Variable Cost}$
+- **P/V Ratio** = $\dfrac{\text{Contribution}}{\text{Sales}} \times 100$
+- **BEP (Units)** = $\dfrac{\text{Fixed Cost}}{\text{Contribution per unit}}$
+- **BEP (₹)** = $\dfrac{\text{Fixed Cost}}{\text{P/V Ratio}}$
+- **Margin of Safety** = $\text{Actual Sales} - \text{BEP Sales}$
+- **MOS Ratio** = $\dfrac{\text{MOS}}{\text{Actual Sales}} \times 100$
 
-> **Exam tip:** In marginal costing, fixed costs are period costs — never include them in stock valuation.
+> Exam tip: In marginal costing, fixed costs are period costs — never include them in closing stock valuation.
 $MD$);
 END IF;
 
--- Auditing
 SELECT id INTO sid FROM public.subjects WHERE name ILIKE '%audit%' AND level = 'Intermediate' LIMIT 1;
 IF sid IS NOT NULL THEN
-  INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Auditing — Standards & Key Concepts', $MD$
-## Important SAs
-| SA | Topic |
+INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Auditing — Risk, Materiality & Opinions', $MD$
+## Audit Risk Model
+$$\text{Audit Risk} = \text{Inherent Risk} \times \text{Control Risk} \times \text{Detection Risk}$$
+
+- **IR & CR** → assessed, cannot be changed by auditor
+- **DR** → controlled by auditor through substantive procedures
+
+## Materiality
+- **Planning Materiality** = $0.5\%\text{–}1\%\ \text{of Revenue}$ or $5\%\text{–}10\%\ \text{of PBT}$
+- **Performance Materiality** = $50\%\text{–}75\%\ \text{of Planning Materiality}$
+
+## Audit Opinions
+| Opinion | Condition |
 |---|---|
-| SA 200 | Overall Objectives of Auditor |
-| SA 210 | Agreeing Terms of Audit Engagement |
-| SA 230 | Audit Documentation |
-| SA 240 | Auditor's Responsibilities — Fraud |
-| SA 260 | Communication with TCWG |
-| SA 299 | Joint Audit |
+| Unmodified | True & fair view — no issues |
+| Qualified | Material but NOT pervasive misstatement/limitation |
+| Adverse | Material AND pervasive misstatement |
+| Disclaimer | Material AND pervasive limitation of scope |
+
+## Key SAs
+| SA | Subject |
+|---|---|
+| SA 200 | Overall Objectives |
+| SA 240 | Fraud Responsibilities |
 | SA 315 | Risk Assessment |
 | SA 320 | Materiality |
 | SA 500 | Audit Evidence |
-| SA 520 | Analytical Procedures |
 | SA 530 | Audit Sampling |
-| SA 700 | Forming Opinion & Reporting |
-| SA 705 | Modifications to Opinion |
-| SA 706 | Emphasis of Matter |
+| SA 700/705/706 | Reporting |
 
-## Types of Audit Opinion
-- **Unmodified** — financial statements give true & fair view
-- **Qualified** — material but not pervasive misstatement / limitation
-- **Adverse** — material AND pervasive misstatement
-- **Disclaimer** — material AND pervasive limitation of scope
-
-## Audit Risk
-**Audit Risk = Inherent Risk × Control Risk × Detection Risk**
-
-- IR & CR → assessed by auditor (cannot change)
-- DR → auditor controls this by changing substantive procedures
-
-## Materiality
-- Quantitative: typically 0.5%–1% of revenue or 5%–10% of PBT
-- Qualitative: nature of item regardless of amount
-
-> **Exam tip:** Know the difference between Qualified, Adverse, and Disclaimer opinions — ICAI frequently tests this with scenarios.
+> Exam tip: Adverse = misstatement (you know the truth, it's wrong). Disclaimer = limitation (you can't know the truth).
 $MD$);
 END IF;
 
 -- ── FINAL ───────────────────────────────────────────────────
 
--- Financial Reporting
 SELECT id INTO sid FROM public.subjects WHERE name ILIKE '%financial reporting%' AND level = 'Final' LIMIT 1;
 IF sid IS NOT NULL THEN
-  INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Ind AS — Key Standards Quick Reference', $MD$
-## Ind AS 2 — Inventories
-- **Cost** = Purchase Cost + Conversion Cost + Other Costs
-- **NRV** = Estimated Selling Price − Estimated Costs to Complete − Selling Costs
-- **Measurement:** Lower of Cost and NRV
-- **Cost Formulas:** FIFO or Weighted Average (LIFO not permitted)
-
-## Ind AS 16 — PPE
-- **Initial Recognition:** Cost model
-- **Subsequent:** Cost model OR Revaluation model
-- **Depreciation:** Component approach mandatory
-- **Derecognition:** Gain/loss to P&L (not OCI)
-
-## Ind AS 109 — Financial Instruments
-### Classification of Financial Assets
-| Business Model | Cash Flow Test | Category |
+INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'Ind AS — Financial Instruments & Revenue', $MD$
+## Ind AS 109 — Classification of Financial Assets
+| Business Model | SPPI Test | Measurement |
 |---|---|---|
-| Hold to collect | SPPI | Amortised Cost |
-| Hold to collect & sell | SPPI | FVOCI |
-| Other | Any | FVTPL |
+| Hold to collect | Pass | Amortised Cost |
+| Hold to collect & sell | Pass | FVOCI |
+| Other / Trading | Any | FVTPL |
 
-### Impairment — ECL Model
-- **Stage 1:** 12-month ECL (no significant increase in credit risk)
-- **Stage 2:** Lifetime ECL (significant increase, not credit-impaired)
-- **Stage 3:** Lifetime ECL (credit-impaired)
+## Effective Interest Rate (EIR)
+$$\text{Amortised Cost}_{t} = \text{Amortised Cost}_{t-1} + \text{EIR} \times \text{AC}_{t-1} - \text{Cash Flow}_t$$
 
-## Ind AS 115 — Revenue
-**5-Step Model:**
-1. Identify the contract
-2. Identify performance obligations
-3. Determine transaction price
-4. Allocate transaction price
-5. Recognise revenue when/as PO satisfied
+## ECL Impairment Stages
+| Stage | Trigger | ECL Measure |
+|---|---|---|
+| 1 | No significant increase in credit risk | 12-month ECL |
+| 2 | Significant increase, not impaired | Lifetime ECL |
+| 3 | Credit-impaired | Lifetime ECL |
+
+## Ind AS 115 — 5-Step Revenue Model
+1. Identify the **contract** with customer
+2. Identify **performance obligations**
+3. Determine **transaction price**
+4. **Allocate** TP to POs (based on SSP)
+5. Recognise revenue when/as **PO satisfied**
 
 ## Ind AS 116 — Leases (Lessee)
-- **Right-of-Use Asset** = Lease Liability + Initial Direct Costs + Prepayments − Lease Incentives
-- **Lease Liability** = PV of future lease payments
-- Short-term leases (≤12 months) & low-value assets → straight-line expense
+- **Lease Liability** = $PV\ \text{of future lease payments}$
+- **ROU Asset** = $\text{Lease Liability} + \text{Initial Direct Costs} + \text{Prepayments} - \text{Incentives}$
+- **Depreciation** = $\dfrac{\text{ROU Asset}}{\text{Lease Term}}$ (straight-line)
 
-> **Exam tip:** Ind AS 109 ECL stages and Ind AS 115 five-step model are very high-frequency exam topics.
+> Exam tip: Ind AS 109 ECL and Ind AS 115 five-step model are the two most tested topics in FR — know them cold.
 $MD$);
 END IF;
 
--- SFM
 SELECT id INTO sid FROM public.subjects WHERE name ILIKE '%strategic financial%' AND level = 'Final' LIMIT 1;
 IF sid IS NOT NULL THEN
-  INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'SFM — Key Formulas', $MD$
+INSERT INTO public.formula_sheets (subject_id, title, content) VALUES (sid, 'SFM — Capital Budgeting & Cost of Capital', $MD$
 ## Capital Budgeting
-- **NPV** = Σ [CFt / (1+r)t] − Initial Investment
-- **IRR** = r at which NPV = 0
-- **Payback Period** = Initial Investment / Annual Cash Flow
-- **PI (Profitability Index)** = PV of Cash Inflows / Initial Investment
-- **MIRR** = (FV of Cash Inflows / PV of Cash Outflows)^(1/n) − 1
+- **NPV** = $\displaystyle\sum_{t=1}^{n} \dfrac{CF_t}{(1+r)^t} - C_0$
+- **IRR** = $r$ such that $NPV = 0$
+- **Profitability Index** = $\dfrac{PV\ \text{of Inflows}}{C_0}$
+- **MIRR** = $\left(\dfrac{FV\ \text{of Inflows}}{PV\ \text{of Outflows}}\right)^{1/n} - 1$
+- **Payback Period** = $\dfrac{C_0}{\text{Annual CF}}$
 
 ## Cost of Capital
-- **Kd (post-tax)** = I(1−t) / NP (for irredeemable)
-- **Ke (Gordon Model)** = D1/P0 + g
-- **Ke (CAPM)** = Rf + β(Rm − Rf)
-- **WACC** = Σ (Weight × Cost of each component)
+- **Kd (post-tax, irredeemable)** = $\dfrac{I(1-t)}{NP}$
+- **Kd (redeemable)** = $\dfrac{I(1-t) + \frac{RV-NP}{n}}{\frac{RV+NP}{2}}$
+- **Ke (Gordon)** = $\dfrac{D_1}{P_0} + g$
+- **Ke (CAPM)** = $R_f + \beta(R_m - R_f)$
+- **WACC** = $\displaystyle\sum w_i \cdot K_i$
 
 ## Leverages
-- **Operating Leverage** = Contribution / EBIT
-- **Financial Leverage** = EBIT / EBT
-- **Combined Leverage** = OL × FL = Contribution / EBT
+- **Operating Leverage** = $\dfrac{\text{Contribution}}{\text{EBIT}}$
+- **Financial Leverage** = $\dfrac{\text{EBIT}}{\text{EBT}}$
+- **Combined Leverage** = $OL \times FL = \dfrac{\text{Contribution}}{\text{EBT}}$
 
-## Portfolio Management
-- **Expected Return** = Σ (Probability × Return)
-- **Portfolio Return** = w₁R₁ + w₂R₂
-- **Portfolio Variance** = w₁²σ₁² + w₂²σ₂² + 2w₁w₂ρ₁₂σ₁σ₂
-- **Beta of Portfolio** = w₁β₁ + w₂β₂
-- **Sharpe Ratio** = (Rp − Rf) / σp
-- **Treynor Ratio** = (Rp − Rf) / βp
+## Portfolio Theory
+- **Portfolio Return** = $w_1R_1 + w_2R_2$
+- **Portfolio Variance** = $w_1^2\sigma_1^2 + w_2^2\sigma_2^2 + 2w_1w_2\rho_{12}\sigma_1\sigma_2$
+- **Sharpe Ratio** = $\dfrac{R_p - R_f}{\sigma_p}$
+- **Treynor Ratio** = $\dfrac{R_p - R_f}{\beta_p}$
+- **Jensen's Alpha** = $R_p - [R_f + \beta_p(R_m - R_f)]$
 
 ## Forex
-- **Direct Quote:** 1 Foreign = x Domestic
-- **Indirect Quote:** 1 Domestic = x Foreign
-- **Cross Rate:** A/C = (A/B) × (B/C)
-- **Forward Premium/Discount** = [(F−S)/S] × (12/n) × 100
+- **Forward Premium** = $\dfrac{F - S}{S} \times \dfrac{12}{n} \times 100$
+- **Interest Rate Parity** = $\dfrac{F}{S} = \dfrac{1 + r_d}{1 + r_f}$
+- **Purchasing Power Parity** = $\dfrac{F}{S} = \dfrac{1 + \text{Inflation}_d}{1 + \text{Inflation}_f}$
 
-> **Exam tip:** In CAPM, always use the risk-free rate carefully — sometimes T-bill rate and T-bond rate both are given; use the one specified.
+> Exam tip: In CAPM, β > 1 = aggressive stock (more volatile than market). β < 1 = defensive stock.
 $MD$);
 END IF;
 

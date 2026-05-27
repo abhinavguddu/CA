@@ -1,0 +1,22 @@
+-- Seed more Flashcards for CA Students
+INSERT INTO public.flashcards (front, back) VALUES
+('What is the formula for Return on Equity (ROE)?', 'Net Income / Shareholder''s Equity'),
+('What does AS-3 deal with?', 'Cash Flow Statements'),
+('What is the formula for Current Ratio?', 'Current Assets / Current Liabilities'),
+('What is the formula for Debt to Equity Ratio?', 'Total Debt / Total Equity'),
+('What is the formula for Inventory Turnover Ratio?', 'Cost of Goods Sold / Average Inventory'),
+('What does Section 141 of the Companies Act, 2013 relate to?', 'Eligibility, qualifications and disqualifications of auditors'),
+('What is the formula for Price Earnings (P/E) Ratio?', 'Market Value per Share / Earnings per Share (EPS)'),
+('What is the formula for Earnings Per Share (EPS)?', '(Net Income - Preferred Dividends) / End-of-Period Common Shares Outstanding'),
+('What does AS-10 deal with?', 'Property, Plant and Equipment'),
+('What is the formula for Dividend Yield?', 'Annual Dividends per Share / Price per Share'),
+('What is the formula for Gross Profit Margin?', '(Revenue - Cost of Goods Sold) / Revenue'),
+('What does Section 80C of the Income Tax Act relate to?', 'Deduction in respect of life insurance premia, deferred annuity, contributions to provident fund, subscription to certain equity shares or debentures, etc. (Limit ₹1,50,000)'),
+('What is the formula for Operating Profit Margin?', 'Operating Profit (EBIT) / Revenue'),
+('What does Section 134 of the Companies Act, 2013 deal with?', 'Financial statement, Board''s report, etc.'),
+('What is the formula for Net Profit Margin?', 'Net Profit / Revenue'),
+('What does AS-26 deal with?', 'Intangible Assets'),
+('What is the formula for Acid Test (Quick) Ratio?', '(Cash + Cash Equivalents + Marketable Securities + Accounts Receivable) / Current Liabilities'),
+('What does Section 194J of the Income Tax Act relate to?', 'TDS on Fees for Professional or Technical Services'),
+('What is the formula for Return on Assets (ROA)?', 'Net Income / Total Assets'),
+('What does AS-18 deal with?', 'Related Party Disclosures');
