@@ -45,7 +45,7 @@ function Landing() {
       </header>
 
       <main className="relative z-10">
-        <section className="mx-auto max-w-5xl px-6 pt-20 pb-24 text-center md:pt-32">
+        <section className="mx-auto max-w-5xl px-6 pt-8 pb-24 text-center md:pt-14">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: "easeOut" }}>
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}

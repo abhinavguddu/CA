@@ -1,209 +1,439 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth";
-import { RotateCw, ThumbsUp, ThumbsDown, Sparkles, Flame, CheckCircle2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Brain, ChevronLeft, ChevronRight, RotateCw, Shuffle, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
-import { addDays, format, isBefore, isEqual, startOfDay } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/flashcards")({ component: FlashCards });
 
+const CARD_COLORS = [
+  "from-violet-600 via-purple-600 to-indigo-700",
+  "from-emerald-500 via-teal-600 to-cyan-700",
+  "from-amber-500 via-orange-500 to-red-500",
+  "from-blue-600 via-blue-700 to-indigo-800",
+  "from-rose-500 via-pink-600 to-fuchsia-700",
+  "from-teal-500 via-cyan-600 to-sky-700",
+];
+
+const GLOW = [
+  "shadow-violet-500/25",
+  "shadow-emerald-500/25",
+  "shadow-amber-500/25",
+  "shadow-blue-500/25",
+  "shadow-rose-500/25",
+  "shadow-teal-500/25",
+];
+
+type FlashcardSubject = {
+  name?: string | null;
+  level?: string | null;
+};
+
+type Flashcard = {
+  id: string;
+  front: string;
+  back: string;
+  subject_id?: string | null;
+  subjects?: FlashcardSubject | null;
+};
+
+type SubjectOption = {
+  id: string;
+  name: string;
+  level: string | null;
+};
+
+const FALLBACK_CARDS: Flashcard[] = [
+  {
+    id: "f1",
+    front: "What is the Accounting Equation?",
+    back: "Assets = Liabilities + Capital",
+    subjects: null,
+  },
+  {
+    id: "f2",
+    front: "Formula for BEP (Break Even Point) in units?",
+    back: "Fixed Cost ÷ Contribution per unit",
+    subjects: null,
+  },
+  {
+    id: "f3",
+    front: "What is CAPM formula?",
+    back: "Ke = Rf + β(Rm − Rf)\nRf = Risk-free rate, β = Beta, Rm = Market return",
+    subjects: null,
+  },
+  {
+    id: "f4",
+    front: "What does AS-1 deal with?",
+    back: "Disclosure of Accounting Policies",
+    subjects: null,
+  },
+  {
+    id: "f5",
+    front: "HRA Exemption — least of which 3 amounts?",
+    back: "1. Actual HRA received\n2. 50%/40% of Basic+DA (Metro/Non-metro)\n3. Rent paid − 10% of Basic+DA",
+    subjects: null,
+  },
+  {
+    id: "f6",
+    front: "What is EOQ formula?",
+    back: "EOQ = √(2 × Annual Demand × Ordering Cost ÷ Carrying Cost per unit)",
+    subjects: null,
+  },
+  { id: "f7", front: "What is Operating Leverage?", back: "Contribution ÷ EBIT", subjects: null },
+  { id: "f8", front: "What is Financial Leverage?", back: "EBIT ÷ EBT", subjects: null },
+  {
+    id: "f9",
+    front: "What does Section 139 of Companies Act 2013 state?",
+    back: "Appointment of Auditors.\nFirst auditor appointed by BOD within 30 days of incorporation.",
+    subjects: null,
+  },
+  {
+    id: "f10",
+    front: "What is NPV decision rule?",
+    back: "Accept project if NPV > 0\nReject if NPV < 0\nIndifferent if NPV = 0",
+    subjects: null,
+  },
+  {
+    id: "f11",
+    front: "What does AS-2 deal with?",
+    back: "Valuation of Inventories\nMeasurement: Lower of Cost and NRV",
+    subjects: null,
+  },
+  {
+    id: "f12",
+    front: "What is Margin of Safety formula?",
+    back: "MOS = Actual Sales − BEP Sales\nMOS % = (MOS ÷ Actual Sales) × 100",
+    subjects: null,
+  },
+  {
+    id: "f13",
+    front: "What is WACC?",
+    back: "Weighted Average Cost of Capital\nWACC = Σ (Weight × Cost of each component)",
+    subjects: null,
+  },
+  {
+    id: "f14",
+    front: "What does Section 16 of CGST Act deal with?",
+    back: "Conditions for claiming Input Tax Credit (ITC):\n1. Registered person\n2. Tax invoice available\n3. Goods/services received\n4. Tax paid by supplier\n5. Return filed (GSTR-3B)",
+    subjects: null,
+  },
+  {
+    id: "f15",
+    front: "What is Audit Risk formula?",
+    back: "Audit Risk = Inherent Risk × Control Risk × Detection Risk",
+    subjects: null,
+  },
+  {
+    id: "f16",
+    front: "What is the Going Concern concept?",
+    back: "Assumption that the entity will continue in business for the foreseeable future — no intention to liquidate.",
+    subjects: null,
+  },
+  {
+    id: "f17",
+    front: "What does Ind AS 115 deal with?",
+    back: "Revenue from Contracts with Customers\n5-Step Model: Identify contract → POs → Transaction price → Allocate → Recognise",
+    subjects: null,
+  },
+  {
+    id: "f18",
+    front: "What is Super Profit?",
+    back: "Super Profit = Actual Profit − Normal Profit\nNormal Profit = Capital Employed × Normal Rate ÷ 100",
+    subjects: null,
+  },
+  {
+    id: "f19",
+    front: "What is Sharpe Ratio?",
+    back: "Sharpe Ratio = (Rp − Rf) ÷ σp\nMeasures excess return per unit of total risk",
+    subjects: null,
+  },
+  {
+    id: "f20",
+    front: "What does Section 80C of Income Tax Act deal with?",
+    back: "Deductions for LIC premium, PPF, ELSS, home loan principal etc.\nMaximum deduction: ₹1,50,000",
+    subjects: null,
+  },
+];
+
 function FlashCards() {
-  const { session } = useAuth();
-  const queryClient = useQueryClient();
-  const userId = session?.user.id;
-
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [index, setIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [dir, setDir] = useState<1 | -1>(1);
+  const [subjectFilter, setSubjectFilter] = useState("all");
+  const [shuffled, setShuffled] = useState(false);
 
-  // Fetch all flashcards
-  const { data: flashcards = [], isLoading: cardsLoading } = useQuery({
+  const { data: rawCards = [], isLoading } = useQuery<Flashcard[]>({
     queryKey: ["flashcards"],
     queryFn: async () => {
-      const { data } = await supabase.from("flashcards").select("*");
-      return data || [];
+      const { data, error } = await supabase.from("flashcards").select("*, subjects(name, level)");
+      if (error || !data?.length) return FALLBACK_CARDS;
+      return data as Flashcard[];
     },
   });
 
-  // Fetch user reviews
-  const { data: reviews = [], isLoading: reviewsLoading } = useQuery({
-    queryKey: ["flashcard_reviews", userId],
+  const flashcards = rawCards.length ? rawCards : FALLBACK_CARDS;
+
+  const { data: subjects = [] } = useQuery<SubjectOption[]>({
+    queryKey: ["subjects"],
     queryFn: async () => {
-      const { data } = await supabase.from("flashcard_reviews").select("*").eq("user_id", userId!);
-      return data || [];
+      const { data } = await supabase
+        .from("subjects")
+        .select("id, name, level")
+        .order("level")
+        .order("name");
+      return (data ?? []) as SubjectOption[];
     },
-    enabled: !!userId,
   });
 
-  const reviewMutation = useMutation({
-    mutationFn: async ({ flashcardId, ease, intervalDays, nextReview, count }: any) => {
-      const payload = {
-        user_id: userId!,
-        flashcard_id: flashcardId,
-        ease,
-        interval_days: intervalDays,
-        next_review: nextReview,
-        last_reviewed: new Date().toISOString(),
-        reviews_count: count,
-      };
+  const filtered = flashcards.filter(
+    (c) => subjectFilter === "all" || c.subject_id === subjectFilter,
+  );
 
-      const { error } = await supabase.from("flashcard_reviews").upsert(payload, { onConflict: "user_id, flashcard_id" });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["flashcard_reviews", userId] });
-    }
-  });
+  const cards = shuffled ? [...filtered].sort(() => Math.random() - 0.5) : filtered;
 
-  if (cardsLoading || reviewsLoading) return <div className="p-10 flex justify-center"><div className="animate-pulse">Loading...</div></div>;
-
-  const today = startOfDay(new Date());
-  
-  // Filter due cards
-  const dueCards = flashcards.filter(card => {
-    const review = reviews.find(r => r.flashcard_id === card.id);
-    if (!review) return true; // Never reviewed
-    const nextDate = startOfDay(new Date(review.next_review));
-    return isBefore(nextDate, today) || isEqual(nextDate, today);
-  });
-
-  const handleReview = (quality: "again" | "good" | "easy") => {
-    const activeCard = dueCards[currentIndex];
-    const review = reviews.find(r => r.flashcard_id === activeCard.id) || { ease: 2, interval_days: 1, reviews_count: 0 };
-    
-    let newEase = review.ease;
-    let newInterval = review.interval_days;
-
-    if (quality === "again") {
-      newEase = Math.max(1, newEase - 1);
-      newInterval = 1;
-    } else if (quality === "good") {
-      newInterval = Math.max(1, Math.round(newInterval * Math.max(1.6, newEase * 0.9)));
-    } else if (quality === "easy") {
-      newEase += 1;
-      newInterval = Math.max(2, Math.round(newInterval * newEase));
-    }
-
-    const nextDate = addDays(new Date(), newInterval);
-
-    reviewMutation.mutate({
-      flashcardId: activeCard.id,
-      ease: newEase,
-      intervalDays: newInterval,
-      nextReview: format(nextDate, "yyyy-MM-dd"),
-      count: review.reviews_count + 1
-    });
-
+  function go(newDir: 1 | -1) {
+    setDir(newDir);
     setIsFlipped(false);
-    setTimeout(() => {
-      // Don't advance index, array shrinks because React Query refetches, but let's manage it optimistically for UX
-      // Actually, since we invalidate, dueCards will shrink. 
-      // If we just keep index 0, it works as a stack.
-      // But we wait for invalidation, so we can just let it refetch or advance manually.
-      // Easiest is to pop from dueCards locally to make it instantly disappear, but React Query handles it.
-      // We'll rely on the re-render.
-    }, 150);
-  };
+    setTimeout(() => setIndex((i) => (i + newDir + cards.length) % cards.length), 80);
+  }
 
-  const activeCard = dueCards[0];
+  function handleShuffle() {
+    setShuffled((s) => !s);
+    setIndex(0);
+    setIsFlipped(false);
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen mesh-bg">
+        <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  if (cards.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen mesh-bg">
+        <div className="text-center space-y-3">
+          <Brain className="size-12 mx-auto text-muted-foreground/40" />
+          <p className="text-lg font-medium">No flashcards found</p>
+          <p className="text-sm text-muted-foreground">Try a different subject filter</p>
+        </div>
+      </div>
+    );
+  }
+
+  const card = cards[index];
+  const colorIdx = index % CARD_COLORS.length;
+  const progress = Math.round(((index + 1) / cards.length) * 100);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-6 md:p-10 min-h-[80vh] flex flex-col">
-      <div className="text-center mb-4">
-        <h1 className="font-display text-4xl text-[var(--gold)]">Active Recall</h1>
-        <p className="text-muted-foreground mt-2">Spaced repetition for CA concepts</p>
-      </div>
-
-      {dueCards.length === 0 ? (
-        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
-          <div className="size-24 rounded-full bg-orange-500/10 text-orange-500 flex items-center justify-center mx-auto">
-            <Flame className="size-12" />
-          </div>
-          <div>
-            <h2 className="font-display text-4xl mb-2">Session Complete!</h2>
-            <p className="text-muted-foreground">You've reviewed all due flashcards for today.</p>
-          </div>
-        </motion.div>
-      ) : (
-        <div className="flex-1 flex flex-col items-center">
-          <div className="w-full max-w-md flex justify-between items-center mb-4 px-2">
-            <span className="text-sm font-medium bg-secondary px-3 py-1 rounded-full text-muted-foreground">Due: {dueCards.length}</span>
-            <span className="text-sm font-medium bg-[var(--gold)]/10 text-[var(--gold)] px-3 py-1 rounded-full flex items-center gap-1">
-              <Sparkles className="size-3" /> Focus Mode
+    <div className="min-h-full mesh-bg">
+      <div className="mx-auto max-w-lg px-4 py-8 md:py-12 flex flex-col gap-6">
+        {/* Header */}
+        <div className="text-center space-y-1">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="h-px w-8 bg-gradient-to-r from-transparent to-gold rounded-full" />
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-gold/70">
+              Active Recall
             </span>
+            <div className="h-px w-8 bg-gradient-to-l from-transparent to-gold rounded-full" />
           </div>
-
-          <div className="relative w-full max-w-md aspect-[3/4] perspective-1000">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeCard.id + (isFlipped ? "-flipped" : "")}
-                initial={{ opacity: 0, rotateX: isFlipped ? -90 : 90 }}
-                animate={{ opacity: 1, rotateX: 0 }}
-                exit={{ opacity: 0, rotateX: isFlipped ? 90 : -90 }}
-                transition={{ duration: 0.2 }}
-                className="absolute inset-0"
-              >
-                <Card 
-                  className={`w-full h-full cursor-pointer flex flex-col justify-center items-center text-center p-8 border-2 transition-colors relative overflow-hidden ${
-                    !isFlipped 
-                      ? 'border-[var(--gold)]/30 hover:border-[var(--gold)]/70 bg-gradient-to-br from-background via-background to-[var(--gold)]/5' 
-                      : 'border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10'
-                  }`}
-                  onClick={() => !isFlipped && setIsFlipped(true)}
-                >
-                  <CardContent className="p-0 z-10 w-full relative">
-                    {!isFlipped ? (
-                      <>
-                        <h3 className="font-display text-3xl md:text-4xl leading-tight mb-8 bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/70">
-                          {activeCard.front}
-                        </h3>
-                        <div className="flex items-center justify-center gap-2 text-[var(--gold)] text-sm font-medium animate-pulse">
-                          <RotateCw className="size-4" /> Tap to flip
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="absolute -top-12 -left-4 text-9xl text-primary/10 font-serif leading-none">"</div>
-                        <h3 className="text-2xl md:text-3xl font-medium leading-relaxed text-primary">
-                          {activeCard.back}
-                        </h3>
-                        <div className="absolute -bottom-12 -right-4 text-9xl text-primary/10 font-serif leading-none rotate-180">"</div>
-                      </>
-                    )}
-                  </CardContent>
-                  
-                  {/* Decorative background elements */}
-                  {!isFlipped && (
-                    <div className="absolute -bottom-24 -right-24 size-48 bg-[var(--gold)]/10 rounded-full blur-3xl pointer-events-none" />
-                  )}
-                  {isFlipped && (
-                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
-                  )}
-                </Card>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* Action Buttons */}
-          <div className={`mt-8 flex gap-4 transition-opacity duration-300 ${isFlipped ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-            <Button variant="outline" size="lg" className="h-16 px-6 border-red-500/20 hover:bg-red-500/10 hover:text-red-500 flex flex-col gap-1" onClick={() => handleReview("again")}>
-              <ThumbsDown className="size-5" />
-              <span className="text-xs">Again</span>
-            </Button>
-            <Button variant="outline" size="lg" className="h-16 px-6 border-blue-500/20 hover:bg-blue-500/10 hover:text-blue-500 flex flex-col gap-1" onClick={() => handleReview("good")}>
-              <CheckCircle2 className="size-5" />
-              <span className="text-xs">Good</span>
-            </Button>
-            <Button variant="outline" size="lg" className="h-16 px-6 border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-500 flex flex-col gap-1" onClick={() => handleReview("easy")}>
-              <ThumbsUp className="size-5" />
-              <span className="text-xs">Easy</span>
-            </Button>
-          </div>
+          <h1 className="font-display text-4xl">Flashcards</h1>
+          <p className="text-muted-foreground text-sm">Flip to reveal the answer</p>
         </div>
-      )}
+
+        {/* Controls */}
+        <div className="flex items-center gap-3">
+          <Select
+            value={subjectFilter}
+            onValueChange={(v) => {
+              setSubjectFilter(v);
+              setIndex(0);
+              setIsFlipped(false);
+            }}
+          >
+            <SelectTrigger className="flex-1 h-10 bg-background/50 border-border/60 rounded-xl text-sm">
+              <SelectValue placeholder="All Subjects" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Subjects</SelectItem>
+              {subjects.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.level} · {s.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <button
+            onClick={handleShuffle}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
+              shuffled
+                ? "bg-primary/10 border-primary/30 text-primary"
+                : "bg-background/50 border-border/60 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Shuffle className="size-3.5" /> Shuffle
+          </button>
+        </div>
+
+        {/* Progress */}
+        <div className="space-y-1.5">
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>
+              {index + 1} of {cards.length}
+            </span>
+            <span>{progress}%</span>
+          </div>
+          <Progress value={progress} className="h-1.5" />
+        </div>
+
+        {/* Card */}
+        <div style={{ perspective: "1200px" }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`${card.id}-${isFlipped}`}
+              initial={{ opacity: 0, x: dir * 50, rotateY: dir * 12 }}
+              animate={{ opacity: 1, x: 0, rotateY: 0 }}
+              exit={{ opacity: 0, x: -dir * 50, rotateY: -dir * 12 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div
+                onClick={() => setIsFlipped((f) => !f)}
+                className={`relative w-full rounded-3xl overflow-hidden cursor-pointer select-none shadow-2xl ${GLOW[colorIdx]} ${
+                  isFlipped
+                    ? "bg-card border border-border/60"
+                    : `bg-gradient-to-br ${CARD_COLORS[colorIdx]}`
+                }`}
+                style={{ minHeight: 320 }}
+              >
+                {/* Decorative orbs */}
+                <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+                <div className="absolute -bottom-10 -left-10 w-28 h-28 rounded-full bg-white/8 blur-2xl pointer-events-none" />
+
+                {/* Top label */}
+                <div className="relative z-10 flex items-center justify-between px-6 pt-5">
+                  <span
+                    className={`text-xs font-bold uppercase tracking-widest ${isFlipped ? "text-primary/50" : "text-white/50"}`}
+                  >
+                    {isFlipped ? "Answer" : "Question"}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {card.subjects?.name && (
+                      <span
+                        className={`text-xs font-medium px-2.5 py-1 rounded-full ${isFlipped ? "bg-primary/10 text-primary/70" : "bg-white/15 text-white/70"}`}
+                      >
+                        {card.subjects.name}
+                      </span>
+                    )}
+                    <span
+                      className={`text-xs font-mono ${isFlipped ? "text-muted-foreground/30" : "text-white/25"}`}
+                    >
+                      #{index + 1}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div
+                  className="relative z-10 flex flex-col items-center justify-center px-8 py-10 text-center"
+                  style={{ minHeight: 240 }}
+                >
+                  {!isFlipped ? (
+                    <>
+                      <p className="text-white font-semibold text-xl md:text-2xl leading-relaxed">
+                        {card.front}
+                      </p>
+                      <div className="mt-8 flex items-center gap-2 text-white/40 text-xs animate-pulse">
+                        <RotateCw className="size-3.5" />
+                        <span>Tap to flip</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-8 h-0.5 bg-primary/30 rounded-full mb-5" />
+                      <p className="text-foreground font-medium text-lg md:text-xl leading-relaxed">
+                        {card.back}
+                      </p>
+                      <div className="mt-6 flex items-center gap-2 text-muted-foreground/40 text-xs">
+                        <RotateCw className="size-3.5" />
+                        <span>Tap to flip back</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Navigation */}
+        <div className="flex items-center justify-between gap-4">
+          <Button
+            variant="outline"
+            onClick={() => go(-1)}
+            className="flex-1 h-12 rounded-2xl gap-2 border-border/60 hover:bg-muted/60"
+          >
+            <ChevronLeft className="size-4" /> Previous
+          </Button>
+          <button
+            onClick={() => {
+              setIsFlipped(false);
+              setIndex(Math.floor(Math.random() * cards.length));
+            }}
+            className="size-12 rounded-2xl border border-border/60 bg-background/50 hover:bg-muted/60 flex items-center justify-center transition-colors"
+          >
+            <Zap className="size-4 text-gold" />
+          </button>
+          <Button onClick={() => go(1)} className="flex-1 h-12 rounded-2xl gap-2">
+            Next <ChevronRight className="size-4" />
+          </Button>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            {
+              label: "Total Cards",
+              value: cards.length,
+              icon: Brain,
+              color: "text-primary",
+              bg: "bg-primary/10",
+            },
+            {
+              label: "Current",
+              value: index + 1,
+              icon: Sparkles,
+              color: "text-gold",
+              bg: "bg-gold/10",
+            },
+            {
+              label: "Remaining",
+              value: cards.length - index - 1,
+              icon: Zap,
+              color: "text-emerald-500",
+              bg: "bg-emerald-500/10",
+            },
+          ].map((s) => (
+            <div key={s.label} className={`${s.bg} rounded-2xl p-3.5 text-center`}>
+              <s.icon className={`size-4 ${s.color} mx-auto mb-1.5`} />
+              <p className={`text-xl font-display font-bold ${s.color}`}>{s.value}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

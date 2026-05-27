@@ -57,6 +57,24 @@ export const setupTables = createServerFn({ method: "POST" }).handler(async () =
       created_at timestamptz not null default now()
     )`,
     `alter table if exists public.flashcards enable row level security`,
+    `create table if not exists public.study_sessions (
+      id uuid primary key default gen_random_uuid(),
+      user_id uuid not null references auth.users(id) on delete cascade,
+      topic_id uuid references public.topics(id) on delete set null,
+      subject_id uuid references public.subjects(id) on delete cascade,
+      duration_seconds int not null,
+      created_at timestamptz not null default now()
+    )`,
+    `alter table if exists public.study_sessions enable row level security`,
+    `do $$
+    begin
+      if not exists (
+        select 1 from pg_policies where policyname = 'Users can manage own study sessions' and tablename = 'study_sessions'
+      ) then
+        create policy "Users can manage own study sessions" on public.study_sessions for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+      end if;
+    end
+    $$;`,
   ];
 
   const results: { sql: string; error: string | null }[] = [];
