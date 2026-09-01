@@ -52,6 +52,33 @@ export type Database = {
           },
         ]
       }
+      bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          ref_id: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          ref_id: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          ref_id?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       doubts: {
         Row: {
           created_at: string
@@ -80,6 +107,41 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "doubts_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      formula_sheets: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          subject_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          subject_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          subject_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "formula_sheets_subject_id_fkey"
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
@@ -257,6 +319,255 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      flashcards: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          front: string
+          back: string
+          id: string
+          subject_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          front: string
+          back: string
+          id?: string
+          subject_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          front?: string
+          back?: string
+          id?: string
+          subject_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcards_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flashcard_reviews: {
+        Row: {
+          ease: number | null
+          flashcard_id: string
+          id: string
+          interval_days: number | null
+          last_reviewed: string | null
+          next_review: string | null
+          reviews_count: number | null
+          user_id: string
+        }
+        Insert: {
+          ease?: number | null
+          flashcard_id: string
+          id?: string
+          interval_days?: number | null
+          last_reviewed?: string | null
+          next_review?: string | null
+          reviews_count?: number | null
+          user_id: string
+        }
+        Update: {
+          ease?: number | null
+          flashcard_id?: string
+          id?: string
+          interval_days?: number | null
+          last_reviewed?: string | null
+          next_review?: string | null
+          reviews_count?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcard_reviews_flashcard_id_fkey"
+            columns: ["flashcard_id"]
+            isOneToOne: false
+            referencedRelation: "flashcards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_settings: {
+        Row: {
+          exam_date: string
+          id: string
+          label: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          exam_date: string
+          id?: string
+          label: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          exam_date?: string
+          id?: string
+          label?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mock_test_sessions: {
+        Row: {
+          answers: Json
+          attempted: number
+          completed_at: string
+          correct: number
+          id: string
+          level: string | null
+          question_ids: string[]
+          score_pct: number
+          subject_id: string | null
+          time_taken_seconds: number
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          attempted?: number
+          completed_at?: string
+          correct?: number
+          id?: string
+          level?: string | null
+          question_ids?: string[]
+          score_pct?: number
+          subject_id?: string | null
+          time_taken_seconds?: number
+          total_questions?: number
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          attempted?: number
+          completed_at?: string
+          correct?: number
+          id?: string
+          level?: string | null
+          question_ids?: string[]
+          score_pct?: number
+          subject_id?: string | null
+          time_taken_seconds?: number
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_test_sessions_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_plans: {
+        Row: {
+          created_at: string
+          daily_hours: number
+          exam_date: string
+          id: string
+          level: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_hours?: number
+          exam_date: string
+          id?: string
+          level?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_hours?: number
+          exam_date?: string
+          id?: string
+          level?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_sessions: {
+        Row: {
+          created_at: string
+          duration_seconds: number
+          id: string
+          subject_id: string | null
+          topic_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds: number
+          id?: string
+          subject_id?: string | null
+          topic_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          subject_id?: string | null
+          topic_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_sessions_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_sessions_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_streaks: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          minutes: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          minutes?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          minutes?: number
+          user_id?: string
+        }
+        Relationships: []
       }
       subjects: {
         Row: {

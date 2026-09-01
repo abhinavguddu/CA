@@ -15,6 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateDetailedAnswer, addPastQuestion } from "@/lib/past-questions.functions";
+import { logActivity } from "@/lib/activity";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { FileQuestion, Sparkles, RefreshCw, Plus, Calendar, BookMarked, CheckCircle2, Search, FileText, ExternalLink } from "lucide-react";
@@ -83,6 +84,7 @@ function PastQuestionsPage() {
       qc.setQueryData<AnswerResult>(["question_answer", activeId], { answer: r.answer, citations: (r.citations ?? []) as any[] });
       qc.invalidateQueries({ queryKey: ["answered_question_ids"] });
       toast.success("Regenerated");
+      logActivity("Regenerated an answer for a past question", undefined, "/past-questions");
     } catch (e: any) {
       toast.error(e.message ?? "Failed");
     }
@@ -118,7 +120,7 @@ function PastQuestionsPage() {
     const hasAnswer = answeredIds?.has(q.id);
     return (
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}>
-        <Card className="group relative cursor-pointer h-full overflow-hidden p-6 glass-card border-t-2 border-t-transparent hover:border-t-[var(--gold)] transition-all duration-300" onClick={() => setActiveId(q.id)}>
+        <Card className="group relative cursor-pointer h-full overflow-hidden p-6 glass-card border-t-2 border-t-transparent hover:border-t-[var(--gold)] transition-all duration-300" onClick={() => { setActiveId(q.id); logActivity("Opened a past question", (q.question_text ?? "").slice(0, 80), "/past-questions"); }}>
           <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-10 transition-opacity pointer-events-none transform translate-x-4 -translate-y-4">
             <BookMarked className="size-24 text-gold" />
           </div>

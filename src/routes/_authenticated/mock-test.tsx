@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, Clock, Target, ChevronRight, RotateCcw, BookOpen, CheckCircle2, XCircle, AlertCircle, Flame, Play } from "lucide-react";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activity";
 
 export const Route = createFileRoute("/_authenticated/mock-test")({ component: MockTestPage });
 
@@ -75,6 +76,7 @@ function MockTestPage() {
       const sessionResult: SessionResult = { total, attempted, correct, timeTaken, answers: finalAnswers };
       setResult(sessionResult);
       setPhase("results");
+      logActivity("Finished a mock test", `Score ${score_pct}% (${correct}/${total} correct)`, "/mock-test");
 
       if (user) {
         try {
@@ -133,11 +135,13 @@ function MockTestPage() {
     setTimeLeft(shuffled.length * TIME_PER_Q);
     startTimeRef.current = Date.now();
     setPhase("test");
+    logActivity("Started a mock test", `${shuffled.length} questions`, "/mock-test");
   }
 
   function markAnswer(qId: string, val: "correct" | "skipped") {
     const updated = { ...answers, [qId]: val };
     setAnswers(updated);
+    logActivity(val === "correct" ? "Answered a mock test question" : "Skipped a mock test question", undefined, "/mock-test");
     if (current < questions.length - 1) {
       setCurrent((c) => c + 1);
     } else {
@@ -152,6 +156,7 @@ function MockTestPage() {
     setAnswers({});
     setResult(null);
     setCurrent(0);
+    logActivity("Restarted mock test setup", undefined, "/mock-test");
   }
 
   return (

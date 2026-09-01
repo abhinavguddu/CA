@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Zap, FileText, BookmarkX, BrainCircuit, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activity";
 
 export const Route = createFileRoute("/_authenticated/revision")({ component: RevisionMode });
 
@@ -76,6 +77,7 @@ function RevisionMode() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookmarked_questions", userId] });
       toast.success("Bookmark removed");
+      logActivity("Unbookmarked a question during revision", undefined, "/revision");
     }
   });
 

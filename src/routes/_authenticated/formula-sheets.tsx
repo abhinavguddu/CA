@@ -14,6 +14,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { motion } from "framer-motion";
 import { BookMarked, Plus, FileText, Pencil, Trash2, Layers, Lightbulb, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activity";
 import "katex/dist/katex.min.css";
 import { InlineMath, BlockMath } from "react-katex";
 
@@ -241,6 +242,7 @@ function FormulaSheetsPage() {
     await supabase.from("formula_sheets").delete().eq("id", id);
     qc.invalidateQueries({ queryKey: ["formula_sheets"] });
     toast.success("Sheet deleted");
+    logActivity("Deleted a formula sheet", undefined, "/formula-sheets");
   }
 
   const levels = ["Foundation", "Intermediate", "Final"];
@@ -384,6 +386,7 @@ function AddSheetDialog({ subjects, onAdded }: { subjects: any[]; onAdded: () =>
     try {
       await supabase.from("formula_sheets").insert({ title: data.title, subject_id: data.subjectId !== "none" ? data.subjectId : null, content: data.content });
       toast.success("Sheet added"); setOpen(false); onAdded();
+      logActivity("Added a formula sheet", data.title, "/formula-sheets");
     } catch { toast.error("Failed to save"); }
     finally { setBusy(false); }
   }
@@ -405,6 +408,7 @@ function EditSheetDialog({ sheet, subjects, onSaved }: { sheet: any; subjects: a
     try {
       await supabase.from("formula_sheets").update({ title: data.title, subject_id: data.subjectId !== "none" ? data.subjectId : null, content: data.content, updated_at: new Date().toISOString() }).eq("id", sheet.id);
       toast.success("Sheet updated"); setOpen(false); onSaved();
+      logActivity("Updated a formula sheet", data.title, "/formula-sheets");
     } catch { toast.error("Failed to update"); }
     finally { setBusy(false); }
   }

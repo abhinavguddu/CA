@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { MessageSquare, BookOpen, Sparkles, ArrowRight, PlayCircle, Trophy, TrendingUp, Zap, Star, ClipboardList, Bookmark, FileText, Flame, Calendar, Pencil, Check, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activity";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({ component: Dashboard });
 
@@ -75,6 +76,7 @@ function Dashboard() {
       qc.invalidateQueries({ queryKey: ["exam_settings"] });
       setEditing(false);
       toast.success("Exam dates saved");
+      logActivity("Updated exam dates", undefined, "/dashboard");
     } catch {
       toast.error("Failed to save");
     } finally {

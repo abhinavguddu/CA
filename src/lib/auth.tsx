@@ -43,8 +43,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function loadRoles(uid: string) {
-    const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
-    setRoles((data ?? []).map((r) => r.role as Role));
+    try {
+      // @ts-expect-error typed client doesn't know this RPC
+      const { data } = await supabase.rpc("get_my_roles");
+      setRoles((data ?? []) as unknown as Role[]);
+    } catch {
+      // fallback to direct table read
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
+      setRoles((data ?? []).map((r) => r.role as Role));
+    }
   }
 
   async function signIn(email: string, password: string) {

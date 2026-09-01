@@ -23,7 +23,7 @@ create table if not exists public.formula_sheets (
 );
 alter table public.formula_sheets enable row level security;
 create policy "Anyone authenticated can read formula sheets" on public.formula_sheets
-  for select using (auth.role() = 'authenticated');
+  for select using (true);
 create policy "Teachers can manage formula sheets" on public.formula_sheets
   for all using (
     exists (select 1 from public.user_roles where user_id = auth.uid() and role in ('teacher','admin'))

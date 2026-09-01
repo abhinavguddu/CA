@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { logActivity } from "@/lib/activity";
 
 type Level = "Foundation" | "Intermediate" | "Final";
 
@@ -82,7 +83,11 @@ function Syllabus() {
       notes: patch.notes ?? existing?.notes ?? null,
     }, { onConflict: "user_id,topic_id" });
     if (error) toast.error(error.message);
-    else qc.invalidateQueries({ queryKey: ["syllabus"] });
+    else {
+      qc.invalidateQueries({ queryKey: ["syllabus"] });
+      const statusLabel = patch.status ?? "updated";
+      logActivity(`Marked topic as ${statusLabel}`, undefined, "/syllabus");
+    }
   }
 
   const stats = useMemo(() => {

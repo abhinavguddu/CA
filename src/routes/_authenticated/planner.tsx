@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { differenceInDays, format, addDays } from "date-fns";
+import { logActivity } from "@/lib/activity";
 import { setupTables } from "@/lib/migrations.server";
 import {
   Dialog,
@@ -553,11 +554,16 @@ function Planner() {
         { onConflict: "user_id,topic_id" },
       );
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["studySessions", userId] });
       queryClient.invalidateQueries({ queryKey: ["topics_progress", userId] });
       queryClient.invalidateQueries({ queryKey: ["streaks", userId] });
       toast.success("Study session saved!");
+      logActivity(
+        "Completed a study session",
+        `${Math.max(1, Math.round(timerSeconds / 60))} min — ${activeTopic?.title ?? ""}`.trim(),
+        "/planner",
+      );
       setActiveTopic(null);
       setTimerSeconds(0);
       setIsTimerRunning(false);
@@ -588,6 +594,7 @@ function Planner() {
     setTimerSeconds(0);
     setIsTimerRunning(true);
     playStartSound();
+    logActivity("Started a study session timer", t.title, "/planner");
     window.requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     });

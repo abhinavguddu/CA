@@ -9,13 +9,20 @@ import { Flame, Trophy, Calendar, TrendingUp, Zap, Star } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/streaks")({ component: StreaksPage });
 
-const TODAY = new Date().toISOString().slice(0, 10);
+function todayLocal() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+const TODAY = todayLocal();
 
 function StreaksPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
 
-  // Auto-log today's visit
+  // Auto-log today's visit (global tracker also does this; kept as a safety net)
   useEffect(() => {
     if (!user) return;
     supabase.from("study_streaks").upsert({ user_id: user.id, date: TODAY, minutes: 1 }, { onConflict: "user_id,date" }).then(() => {

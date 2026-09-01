@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bookmark, BookmarkX, Search, FileQuestion, BookOpen, Calendar, Sparkles, StickyNote } from "lucide-react";
 import { toast } from "sonner";
+import { logActivity } from "@/lib/activity";
 
 export const Route = createFileRoute("/_authenticated/bookmarks")({ component: BookmarksPage });
 
@@ -64,6 +65,7 @@ function BookmarksPage() {
     await supabase.from("bookmarks").delete().eq("id", id);
     qc.invalidateQueries({ queryKey: ["bookmarks"] });
     toast.success("Bookmark removed");
+    logActivity("Removed a bookmark", undefined, "/bookmarks");
   }
 
   async function saveNote(id: string) {
@@ -71,6 +73,7 @@ function BookmarksPage() {
     qc.invalidateQueries({ queryKey: ["bookmarks"] });
     setEditingNote(null);
     toast.success("Note saved");
+    logActivity("Saved a note on bookmark", noteText.slice(0, 80), "/bookmarks");
   }
 
   const items = (bookmarks ?? []).map((b: any) => {

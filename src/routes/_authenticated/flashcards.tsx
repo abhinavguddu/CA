@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
+import { logActivity } from "@/lib/activity";
 
 export const Route = createFileRoute("/_authenticated/flashcards")({ component: FlashCards });
 
@@ -205,6 +206,7 @@ function FlashCards() {
   function go(newDir: 1 | -1) {
     setDir(newDir);
     setIsFlipped(false);
+    logActivity(newDir === 1 ? "Flipped to next flashcard" : "Flipped to previous flashcard", undefined, "/flashcards");
     setTimeout(() => setIndex((i) => (i + newDir + cards.length) % cards.length), 80);
   }
 
@@ -212,6 +214,7 @@ function FlashCards() {
     setShuffled((s) => !s);
     setIndex(0);
     setIsFlipped(false);
+    logActivity("Shuffled flashcards", undefined, "/flashcards");
   }
 
   if (isLoading) {
@@ -303,55 +306,52 @@ function FlashCards() {
         <div style={{ perspective: "1200px" }}>
           <AnimatePresence mode="wait">
             <motion.div
-              key={`${card.id}-${isFlipped}`}
-              initial={{ opacity: 0, x: dir * 50, rotateY: dir * 12 }}
-              animate={{ opacity: 1, x: 0, rotateY: 0 }}
-              exit={{ opacity: 0, x: -dir * 50, rotateY: -dir * 12 }}
+              key={card.id}
+              initial={{ opacity: 0, x: dir * 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -dir * 50 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             >
               <div
-                onClick={() => setIsFlipped((f) => !f)}
-                className={`relative w-full rounded-3xl overflow-hidden cursor-pointer select-none shadow-2xl ${GLOW[colorIdx]} ${
-                  isFlipped
-                    ? "bg-card border border-border/60"
-                    : `bg-gradient-to-br ${CARD_COLORS[colorIdx]}`
-                }`}
-                style={{ minHeight: 320 }}
+                onClick={() => {
+                  setIsFlipped((f) => !f);
+                  logActivity("Flipped flashcard to reveal answer", undefined, "/flashcards");
+                }}
+                className="relative w-full cursor-pointer select-none"
+                style={{ perspective: "1200px", minHeight: 360 }}
               >
-                {/* Decorative orbs */}
-                <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-                <div className="absolute -bottom-10 -left-10 w-28 h-28 rounded-full bg-white/8 blur-2xl pointer-events-none" />
-
-                {/* Top label */}
-                <div className="relative z-10 flex items-center justify-between px-6 pt-5">
-                  <span
-                    className={`text-xs font-bold uppercase tracking-widest ${isFlipped ? "text-primary/50" : "text-white/50"}`}
-                  >
-                    {isFlipped ? "Answer" : "Question"}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    {card.subjects?.name && (
-                      <span
-                        className={`text-xs font-medium px-2.5 py-1 rounded-full ${isFlipped ? "bg-primary/10 text-primary/70" : "bg-white/15 text-white/70"}`}
-                      >
-                        {card.subjects.name}
-                      </span>
-                    )}
-                    <span
-                      className={`text-xs font-mono ${isFlipped ? "text-muted-foreground/30" : "text-white/25"}`}
-                    >
-                      #{index + 1}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div
-                  className="relative z-10 flex flex-col items-center justify-center px-8 py-10 text-center"
-                  style={{ minHeight: 240 }}
+                <motion.div
+                  animate={{ rotateY: isFlipped ? 180 : 0 }}
+                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ transformStyle: "preserve-3d", position: "relative", minHeight: 360 }}
+                  className="relative w-full"
                 >
-                  {!isFlipped ? (
-                    <>
+                  {/* FRONT FACE */}
+                  <div
+                    className={`absolute inset-0 w-full rounded-3xl overflow-hidden shadow-2xl ${GLOW[colorIdx]} bg-gradient-to-br ${CARD_COLORS[colorIdx]}`}
+                    style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", minHeight: 360 }}
+                  >
+                    {/* Decorative orbs */}
+                    <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+                    <div className="absolute -bottom-10 -left-10 w-28 h-28 rounded-full bg-white/8 blur-2xl pointer-events-none" />
+
+                    {/* Top label */}
+                    <div className="relative z-10 flex items-center justify-between px-6 pt-5">
+                      <span className="text-xs font-bold uppercase tracking-widest text-white/50">
+                        Question
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {card.subjects?.name && (
+                          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-white/15 text-white/70">
+                            {card.subjects.name}
+                          </span>
+                        )}
+                        <span className="text-xs font-mono text-white/25">#{index + 1}</span>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="relative z-10 flex flex-col items-center justify-center px-8 py-10 text-center" style={{ minHeight: 280 }}>
                       <p className="text-white font-semibold text-xl md:text-2xl leading-relaxed">
                         {card.front}
                       </p>
@@ -359,20 +359,46 @@ function FlashCards() {
                         <RotateCw className="size-3.5" />
                         <span>Tap to flip</span>
                       </div>
-                    </>
-                  ) : (
-                    <>
+                    </div>
+                  </div>
+
+                  {/* BACK FACE */}
+                  <div
+                    className="absolute inset-0 w-full rounded-3xl overflow-hidden shadow-2xl bg-card border border-border/60"
+                    style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", transform: "rotateY(180deg)", minHeight: 360 }}
+                  >
+                    {/* Decorative */}
+                    <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full bg-primary/5 blur-2xl pointer-events-none" />
+                    <div className="absolute -bottom-10 -left-10 w-28 h-28 rounded-full bg-gold/5 blur-2xl pointer-events-none" />
+
+                    {/* Top label */}
+                    <div className="relative z-10 flex items-center justify-between px-6 pt-5">
+                      <span className="text-xs font-bold uppercase tracking-widest text-primary/50">
+                        Answer
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {card.subjects?.name && (
+                          <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary/70">
+                            {card.subjects.name}
+                          </span>
+                        )}
+                        <span className="text-xs font-mono text-muted-foreground/30">#{index + 1}</span>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="relative z-10 flex flex-col items-center justify-center px-8 py-10 text-center" style={{ minHeight: 280 }}>
                       <div className="w-8 h-0.5 bg-primary/30 rounded-full mb-5" />
-                      <p className="text-foreground font-medium text-lg md:text-xl leading-relaxed">
+                      <p className="text-foreground font-medium text-lg md:text-xl leading-relaxed whitespace-pre-line">
                         {card.back}
                       </p>
                       <div className="mt-6 flex items-center gap-2 text-muted-foreground/40 text-xs">
                         <RotateCw className="size-3.5" />
                         <span>Tap to flip back</span>
                       </div>
-                    </>
-                  )}
-                </div>
+                    </div>
+                  </div>
+                </motion.div>
               </div>
             </motion.div>
           </AnimatePresence>
