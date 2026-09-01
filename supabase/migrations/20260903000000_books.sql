@@ -61,9 +61,15 @@ values ('ca-materials', 'ca-materials', true, 104857600)
 on conflict (id) do update set public = true, file_size_limit = 104857600;
 
 -- Authenticated users can read files in the bucket (public already but keep read grant)
-create policy if not exists "Authenticated read ca-materials" on storage.objects
-  for select to authenticated
-  using (bucket_id = 'ca-materials');
+do $$
+begin
+  if not exists (select 1 from pg_policies where schemaname='storage' and tablename='objects' and policyname='Authenticated read ca-materials') then
+    create policy "Authenticated read ca-materials" on storage.objects
+      for select to authenticated
+      using (bucket_id = 'ca-materials');
+  end if;
+end
+$$;
 
 do $$
 begin
