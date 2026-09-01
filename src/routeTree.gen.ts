@@ -24,6 +24,7 @@ import { Route as AuthenticatedFormulaSheetsRouteImport } from './routes/_authen
 import { Route as AuthenticatedFlashcardsRouteImport } from './routes/_authenticated/flashcards'
 import { Route as AuthenticatedDoubtsRouteImport } from './routes/_authenticated/doubts'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedBooksRouteImport } from './routes/_authenticated/books'
 import { Route as AuthenticatedBookmarksRouteImport } from './routes/_authenticated/bookmarks'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -104,6 +105,11 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedBooksRoute = AuthenticatedBooksRouteImport.update({
+  id: '/books',
+  path: '/books',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedBookmarksRoute = AuthenticatedBookmarksRouteImport.update({
   id: '/bookmarks',
   path: '/bookmarks',
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/bookmarks': typeof AuthenticatedBookmarksRoute
+  '/books': typeof AuthenticatedBooksRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/doubts': typeof AuthenticatedDoubtsRoute
   '/flashcards': typeof AuthenticatedFlashcardsRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/bookmarks': typeof AuthenticatedBookmarksRoute
+  '/books': typeof AuthenticatedBooksRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/doubts': typeof AuthenticatedDoubtsRoute
   '/flashcards': typeof AuthenticatedFlashcardsRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/bookmarks': typeof AuthenticatedBookmarksRoute
+  '/_authenticated/books': typeof AuthenticatedBooksRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/doubts': typeof AuthenticatedDoubtsRoute
   '/_authenticated/flashcards': typeof AuthenticatedFlashcardsRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/analytics'
     | '/bookmarks'
+    | '/books'
     | '/dashboard'
     | '/doubts'
     | '/flashcards'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/analytics'
     | '/bookmarks'
+    | '/books'
     | '/dashboard'
     | '/doubts'
     | '/flashcards'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/analytics'
     | '/_authenticated/bookmarks'
+    | '/_authenticated/books'
     | '/_authenticated/dashboard'
     | '/_authenticated/doubts'
     | '/_authenticated/flashcards'
@@ -354,6 +366,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/books': {
+      id: '/_authenticated/books'
+      path: '/books'
+      fullPath: '/books'
+      preLoaderRoute: typeof AuthenticatedBooksRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/bookmarks': {
       id: '/_authenticated/bookmarks'
       path: '/bookmarks'
@@ -382,6 +401,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedBookmarksRoute: typeof AuthenticatedBookmarksRoute
+  AuthenticatedBooksRoute: typeof AuthenticatedBooksRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDoubtsRoute: typeof AuthenticatedDoubtsRoute
   AuthenticatedFlashcardsRoute: typeof AuthenticatedFlashcardsRoute
@@ -399,6 +419,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedBookmarksRoute: AuthenticatedBookmarksRoute,
+  AuthenticatedBooksRoute: AuthenticatedBooksRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDoubtsRoute: AuthenticatedDoubtsRoute,
   AuthenticatedFlashcardsRoute: AuthenticatedFlashcardsRoute,

@@ -79,6 +79,109 @@ export type Database = {
         }
         Relationships: []
       }
+      books: {
+        Row: {
+          author: string | null
+          cover_path: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          external_url: string | null
+          file_path: string | null
+          file_size: number | null
+          id: string
+          level: string
+          page_count: number | null
+          subject_id: string | null
+          title: string
+        }
+        Insert: {
+          author?: string | null
+          cover_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          external_url?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          level: string
+          page_count?: number | null
+          subject_id?: string | null
+          title: string
+        }
+        Update: {
+          author?: string | null
+          cover_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          external_url?: string | null
+          file_path?: string | null
+          file_size?: number | null
+          id?: string
+          level?: string
+          page_count?: number | null
+          subject_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "books_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mcq_questions: {
+        Row: {
+          book_id: string | null
+          chapter_no: number
+          chapter_title: string | null
+          correct_index: number | null
+          created_at: string
+          hint: string | null
+          id: string
+          options: unknown
+          question: string
+          question_no: number
+        }
+        Insert: {
+          book_id?: string | null
+          chapter_no?: number
+          chapter_title?: string | null
+          correct_index?: number | null
+          created_at?: string
+          hint?: string | null
+          id?: string
+          options?: unknown
+          question: string
+          question_no: number
+        }
+        Update: {
+          book_id?: string | null
+          chapter_no?: number
+          chapter_title?: string | null
+          correct_index?: number | null
+          created_at?: string
+          hint?: string | null
+          id?: string
+          options?: unknown
+          question?: string
+          question_no?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mcq_questions_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doubts: {
         Row: {
           created_at: string

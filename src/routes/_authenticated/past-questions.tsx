@@ -25,6 +25,156 @@ export const Route = createFileRoute("/_authenticated/past-questions")({ compone
 
 type AnswerResult = { answer: string; citations: any[] };
 
+const PAPERS = [
+  { paper: "Paper 1", label: "Advanced Accounting", abbr: "P1" },
+  { paper: "Paper 2", label: "Corporate and Other Laws", abbr: "P2" },
+  { paper: "Paper 3", label: "Taxation", abbr: "P3" },
+  { paper: "Paper 4", label: "Cost and Management Accounting", abbr: "P4" },
+  { paper: "Paper 5", label: "Auditing and Ethics", abbr: "P5" },
+  { paper: "Paper 6", label: "Financial Management & Strategic Management", abbr: "P6" },
+];
+
+// ICAI Intermediate Course — Official Question Papers (newest first)
+const PAPER_SESSIONS: { title: string; group: string; urls: string[] }[] = [
+  {
+    title: "May 2026",
+    group: "Intermediate",
+    urls: [
+      "https://resource.cdn.icai.org/92099bos-aps4903-int-may2026-p1.pdf",
+      "https://resource.cdn.icai.org/92143bos-aps4903-int-may2026-p2.pdf",
+      "https://resource.cdn.icai.org/92144bos-aps4903-int-may2026-p3.pdf",
+      "https://resource.cdn.icai.org/92190bos-aps4903-int-may2026-p4.pdf",
+      "https://resource.cdn.icai.org/92223bos-aps4903-int-may2026-p5.pdf",
+      "https://resource.cdn.icai.org/92261bos-aps4903-int-may2026-p6.pdf",
+    ],
+  },
+  {
+    title: "January 2026",
+    group: "Intermediate",
+    urls: [
+      "https://resource.cdn.icai.org/90276bos-aps3856-int-jan2026-p1.pdf",
+      "https://resource.cdn.icai.org/90277bos-aps3856-int-jan2026-p2.pdf",
+      "https://resource.cdn.icai.org/90292bos-aps3856-int-jan2026-p3.pdf",
+      "https://resource.cdn.icai.org/90301bos-aps3856-int-jan2026-p4.pdf",
+      "https://resource.cdn.icai.org/90667bos-aps3856-int-jan2026-p5.pdf",
+      "https://resource.cdn.icai.org/90369bos-aps3856-int-jan2026-p6.pdf",
+    ],
+  },
+  {
+    title: "September 2025",
+    group: "Intermediate",
+    urls: [
+      "https://resource.cdn.icai.org/88187bos-aps2271-int-p1-sep2025.pdf",
+      "https://resource.cdn.icai.org/88188bos-aps2271-int-p2-sep2025.pdf",
+      "https://resource.cdn.icai.org/88227bos-aps2271-int-p3-sep2025.pdf",
+      "https://resource.cdn.icai.org/88318bos-aps2271-int-p4-sep2025.pdf",
+      "https://resource.cdn.icai.org/88273bos-aps2271-int-p5-sep2025.pdf",
+      "https://resource.cdn.icai.org/88294bos160925.pdf",
+    ],
+  },
+  {
+    title: "May 2025",
+    group: "Intermediate",
+    urls: [
+      "https://resource.cdn.icai.org/85767bos-aps471-int-p1.pdf",
+      "https://resource.cdn.icai.org/85778bos-aps471-int-p2.pdf",
+      "https://resource.cdn.icai.org/85835bos-aps471-int-p3.pdf",
+      "https://resource.cdn.icai.org/86049bos-aps471-int-p4.pdf",
+      "https://resource.cdn.icai.org/86050bos-aps471-int-p5.pdf",
+      "https://resource.cdn.icai.org/86051bos-aps471-int-p6.pdf",
+    ],
+  },
+  {
+    title: "January 2025",
+    group: "Intermediate",
+    urls: [
+      "https://resource.cdn.icai.org/84035bos67735.pdf",
+      "https://resource.cdn.icai.org/84075bos67789.pdf",
+      "https://resource.cdn.icai.org/84221bos67894-p3.pdf",
+      "https://resource.cdn.icai.org/84222bos67894-p4.pdf",
+      "https://resource.cdn.icai.org/84223bos67894-p5.pdf",
+      "https://resource.cdn.icai.org/84224bos67894-p6.pdf",
+    ],
+  },
+  {
+    title: "September 2024",
+    group: "Intermediate",
+    urls: [
+      "https://resource.cdn.icai.org/82175bos66213.pdf",
+      "https://resource.cdn.icai.org/82193bos66232.pdf",
+      "https://resource.cdn.icai.org/82205bos66245.pdf",
+      "https://resource.cdn.icai.org/82219bos66270.pdf",
+      "https://resource.cdn.icai.org/82232bos66294.pdf",
+      "https://resource.cdn.icai.org/82246bos66313.pdf",
+    ],
+  },
+  {
+    title: "May 2024",
+    group: "Intermediate",
+    urls: [
+      "https://resource.cdn.icai.org/80139bos64251.pdf",
+      "https://resource.cdn.icai.org/80143bos64255.pdf",
+      "https://resource.cdn.icai.org/80214bos64362.pdf",
+      "https://resource.cdn.icai.org/80257bos64413.pdf",
+      "https://resource.cdn.icai.org/80289bos64445.pdf",
+      "https://resource.cdn.icai.org/80550bos64734.pdf",
+    ],
+  },
+];
+
+function QuestionPapersSection() {
+  return (
+    <div className="space-y-5">
+      {PAPER_SESSIONS.map((s, si) => {
+        const groupI = s.urls.slice(0, 3);
+        const groupII = s.urls.slice(3, 6);
+        return (
+          <motion.div key={s.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * si + 0.05 }}>
+            <Card className="glass-card p-6 border-[var(--gold)]/30 bg-gradient-to-br from-[var(--gold)]/5 to-transparent relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none transform translate-x-8 -translate-y-8">
+                <ExternalLink className="size-32 text-gold" />
+              </div>
+              <div className="flex items-center gap-3 mb-6 relative z-10">
+                <div className="p-2 rounded-lg bg-[var(--gold)]/20 text-[var(--gold)]">
+                  <Calendar className="size-5" />
+                </div>
+                <h2 className="font-display text-lg sm:text-2xl">ICAI Question Papers — Intermediate ({s.title})</h2>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-6 relative z-10">
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-primary flex items-center gap-2 border-b border-border/50 pb-2">Group I</h3>
+                  <ul className="space-y-3 text-sm">
+                    {groupI.map((url, i) => (
+                      <li key={url}>
+                        <a href={url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group">
+                          <FileText className="size-4 opacity-70 group-hover:opacity-100" /> {PAPERS[i].paper}: {PAPERS[i].label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-primary flex items-center gap-2 border-b border-border/50 pb-2">Group II</h3>
+                  <ul className="space-y-3 text-sm">
+                    {groupII.map((url, i) => (
+                      <li key={url}>
+                        <a href={url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group">
+                          <FileText className="size-4 opacity-70 group-hover:opacity-100" /> {PAPERS[i + 3].paper}: {PAPERS[i + 3].label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
 function PastQuestionsPage() {
   const { isTeacher } = useAuth();
   const qc = useQueryClient();
@@ -153,47 +303,7 @@ function PastQuestionsPage() {
         {isTeacher && <AddQuestionDialog subjects={subjects ?? []} onAdded={() => qc.invalidateQueries({ queryKey: ["past_questions"] })} addFn={addFn} />}
       </motion.header>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-        <Card className="glass-card p-6 border-[var(--gold)]/30 bg-gradient-to-br from-[var(--gold)]/5 to-transparent relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none transform translate-x-8 -translate-y-8">
-            <ExternalLink className="size-32 text-gold" />
-          </div>
-          <div className="flex items-center gap-3 mb-6 relative z-10">
-            <div className="p-2 rounded-lg bg-[var(--gold)]/20 text-[var(--gold)]">
-              <BookMarked className="size-5" />
-            </div>
-            <h2 className="font-display text-lg sm:text-2xl">ICAI Suggested Answers — Intermediate (Jan 2026)</h2>
-          </div>
-          
-          <div className="grid sm:grid-cols-2 gap-6 relative z-10">
-            <div className="space-y-4">
-              <h3 className="font-semibold text-primary flex items-center gap-2 border-b border-border/50 pb-2">Group I</h3>
-              <ul className="space-y-3 text-sm">
-                <li><a href="https://resource.cdn.icai.org/91199bos-aps4356-sa-int-p1.pdf" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group"><FileText className="size-4 opacity-70 group-hover:opacity-100" /> Paper 1: Advanced Accounting</a></li>
-                <li><a href="https://resource.cdn.icai.org/91200bos-aps4356-sa-int-p2.pdf" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group"><FileText className="size-4 opacity-70 group-hover:opacity-100" /> Paper 2: Corporate and Other Laws</a></li>
-                <li><a href="https://resource.cdn.icai.org/91201bos-aps4356-sa-int-p3.pdf" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group"><FileText className="size-4 opacity-70 group-hover:opacity-100" /> Paper 3: Taxation</a></li>
-              </ul>
-            </div>
-            <div className="space-y-4">
-              <h3 className="font-semibold text-primary flex items-center gap-2 border-b border-border/50 pb-2">Group II</h3>
-              <ul className="space-y-3 text-sm">
-                <li><a href="https://resource.cdn.icai.org/91202bos-aps4356-sa-int-p4.pdf" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group"><FileText className="size-4 opacity-70 group-hover:opacity-100" /> Paper 4: Cost and Management Accounting</a></li>
-                <li><a href="https://resource.cdn.icai.org/91203bos-aps4356-sa-int-p5.pdf" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group"><FileText className="size-4 opacity-70 group-hover:opacity-100" /> Paper 5: Auditing and Ethics</a></li>
-                <li><a href="https://resource.cdn.icai.org/91204bos-aps4356-sa-int-p6.pdf" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-2 group"><FileText className="size-4 opacity-70 group-hover:opacity-100" /> Paper 6: Financial Management & Strategic Management</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="mt-8 flex flex-wrap items-center gap-3 relative z-10 pt-4 border-t border-border/50">
-             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider mr-2">Full Groups:</span>
-             <a href="https://resource.cdn.icai.org/91583bos-aps4356-sa-int-g1.pdf" target="_blank" rel="noreferrer"><Badge variant="secondary" className="bg-[var(--gold)]/10 text-[var(--gold)] hover:bg-[var(--gold)]/20 px-3 py-1.5 cursor-pointer">Group I (Full)</Badge></a>
-             <a href="https://resource.cdn.icai.org/91584bos-aps4356-sa-int-g2.pdf" target="_blank" rel="noreferrer"><Badge variant="secondary" className="bg-[var(--gold)]/10 text-[var(--gold)] hover:bg-[var(--gold)]/20 px-3 py-1.5 cursor-pointer">Group II (Full)</Badge></a>
-             <div className="w-px h-4 bg-border mx-2 hidden sm:block" />
-             <a href="https://resource.cdn.icai.org/91581bos-aps4356-int-ec-g1.pdf" target="_blank" rel="noreferrer"><Badge variant="outline" className="px-3 py-1.5 cursor-pointer hover:bg-muted bg-background/50">Examiner's Comments (Group I)</Badge></a>
-             <a href="https://resource.cdn.icai.org/91582bos-aps4356-int-ec-g2.pdf" target="_blank" rel="noreferrer"><Badge variant="outline" className="px-3 py-1.5 cursor-pointer hover:bg-muted bg-background/50">Examiner's Comments (Group II)</Badge></a>
-          </div>
-        </Card>
-      </motion.div>
+      <QuestionPapersSection />
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         <Card className="glass-card p-2 md:p-4 border-border/60">

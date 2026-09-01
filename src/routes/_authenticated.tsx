@@ -80,6 +80,7 @@ function Layout() {
     { to: "/mock-test", icon: ClipboardList, label: "Mock Test", color: "text-purple-400" },
     { to: "/bookmarks", icon: Bookmark, label: "Bookmarks", color: "text-pink-400" },
     { to: "/formula-sheets", icon: FileText, label: "Formula Sheets", color: "text-cyan-400" },
+    { to: "/books", icon: BookOpen, label: "Books", color: "text-yellow-400" },
     { to: "/streaks", icon: Flame, label: "Study Streak", color: "text-orange-400" },
     ...(isTeacher ? [{ to: "/teacher", icon: Upload, label: "Knowledge Base", color: "text-rose-400" }] : []),
     ...(isAdmin ? [{ to: "/admin", icon: ShieldCheck, label: "Live Activity", color: "text-gold" }] : []),

@@ -13,6 +13,7 @@ type AuthCtx = {
   signUp: (email: string, password: string, displayName: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   isTeacher: boolean;
+  isAdmin: boolean;
 };
 
 const Ctx = createContext<AuthCtx | null>(null);
@@ -78,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <Ctx.Provider value={{
       user, session, roles, loading, signIn, signUp, signOut,
       isTeacher: roles.includes("teacher") || roles.includes("admin"),
+      isAdmin: roles.includes("admin"),
     }}>
       {children}
     </Ctx.Provider>
