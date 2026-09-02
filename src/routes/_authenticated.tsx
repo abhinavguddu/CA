@@ -15,15 +15,19 @@ import {
   X,
   ChevronRight,
   ChevronLeft,
+  ChevronsLeft,
   ClipboardList,
   Bookmark,
-  FileText,
-  Flame,
+  Zap,
   CalendarDays,
   Layers,
   BarChart3,
-  Zap,
   ShieldCheck,
+  FileClock,
+  LibraryBig,
+  MessageCircleQuestion,
+  Sigma,
+  BookMarked,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Footer } from "@/components/Footer";
@@ -70,18 +74,18 @@ function Layout() {
 
   const links = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", color: "text-emerald-400" },
-    { to: "/past-questions", icon: FileQuestion, label: "Past Questions", color: "text-amber-400" },
-    { to: "/books", icon: BookOpen, label: "Books", color: "text-yellow-400" },
-    { to: "/doubts", icon: MessageSquare, label: "Ask Doubts", color: "text-blue-400" },
+    { to: "/past-questions", icon: FileClock, label: "Past Questions", color: "text-amber-400" },
+    { to: "/books", icon: LibraryBig, label: "Books", color: "text-yellow-400" },
+    { to: "/doubts", icon: MessageCircleQuestion, label: "Ask Doubts", color: "text-green-400" },
     { to: "/revision", icon: Zap, label: "Quick Revision", color: "text-rose-400" },
-    { to: "/formula-sheets", icon: FileText, label: "Formula Sheets", color: "text-cyan-400" },
+    { to: "/formula-sheets", icon: Sigma, label: "Formula Sheets", color: "text-cyan-400" },
     { to: "/mock-test", icon: ClipboardList, label: "Mock Test", color: "text-purple-400" },
     { to: "/planner", icon: CalendarDays, label: "Study Planner", color: "text-indigo-400" },
     { to: "/flashcards", icon: Layers, label: "Flash Cards", color: "text-amber-400" },
     { to: "/analytics", icon: BarChart3, label: "Analytics", color: "text-blue-400" },
-    { to: "/syllabus", icon: BookOpen, label: "Syllabus", color: "text-violet-400" },
+    { to: "/syllabus", icon: BookMarked, label: "Syllabus", color: "text-violet-400" },
     { to: "/bookmarks", icon: Bookmark, label: "Bookmarks", color: "text-pink-400" },
-    { to: "/streaks", icon: Flame, label: "Study Streak", color: "text-orange-400" },
+    { to: "/streaks", icon: Zap, label: "Study Streak", color: "text-orange-400" },
     ...(isTeacher ? [{ to: "/teacher", icon: Upload, label: "Knowledge Base", color: "text-rose-400" }] : []),
     ...(isAdmin ? [{ to: "/admin", icon: ShieldCheck, label: "Live Activity", color: "text-gold" }] : []),
   ] as const;
@@ -111,12 +115,35 @@ function Layout() {
             <TooltipTrigger asChild>
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="flex items-center justify-center rounded-lg hover:bg-sidebar-border/40 p-1.5 transition-colors text-sidebar-foreground/50 hover:text-sidebar-foreground flex-shrink-0"
+                className="group flex items-center justify-center gap-1 rounded-lg border border-sidebar-border/60 bg-sidebar-accent/60 p-1.5 transition-colors text-sidebar-foreground/60 hover:border-sidebar-border hover:bg-sidebar-accent hover:text-sidebar-foreground flex-shrink-0 cursor-pointer active:scale-95"
+                aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
               >
-                {sidebarOpen ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
+                {sidebarOpen ? (
+                  <motion.span
+                    key="desk-collapse"
+                    initial={{ x: 0 }}
+                    animate={{ x: [0, -4, 4, -4, 4, 0] }}
+                    transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2.2, ease: "easeInOut" }}
+                    className="flex"
+                  >
+                    <ChevronsLeft className="size-4 group-hover:-translate-x-0.5 transition-transform" />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="desk-expand"
+                    initial={{ x: 0 }}
+                    animate={{ x: [0, -4, 4, -4, 4, 0] }}
+                    transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2.2, ease: "easeInOut" }}
+                    className="flex"
+                  >
+                    <ChevronRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
+                  </motion.span>
+                )}
               </button>
             </TooltipTrigger>
-            <TooltipContent side="right">{sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}</TooltipContent>
+            <TooltipContent side={sidebarOpen ? "bottom" : "right"}>
+              {sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            </TooltipContent>
           </Tooltip>
         )}
       </div>
@@ -133,44 +160,88 @@ function Layout() {
 
       {/* Nav Links */}
       <nav className="flex-1 px-3 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent pb-4">
-        {links.map((l) => {
+        {links.map((l, idx) => {
           const active = loc.pathname === l.to || loc.pathname.startsWith(l.to + "/");
           return (
-            <Tooltip key={l.to}>
-              <TooltipTrigger asChild>
-                <Link to={l.to} className="block">
-                  <div className="relative">
-                    {active && (
-                      <motion.div
-                        layoutId="active-nav-bg"
-                        className="absolute inset-0 rounded-xl bg-sidebar-accent border border-sidebar-border/80"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ type: "spring", stiffness: 350, damping: 35 }}
-                      />
-                    )}
-                    <div
-                      className={`relative z-10 flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
-                        active ? "text-sidebar-foreground" : "text-sidebar-foreground/50 hover:text-sidebar-foreground/90 hover:bg-sidebar-accent/40"
-                      }`}
-                    >
-                      <div className={`flex items-center justify-center size-7 rounded-lg transition-all ${active ? "bg-sidebar-border/80" : "bg-sidebar-border/20"}`}>
-                        <l.icon className={`size-3.5 ${active ? l.color : ""}`} />
+            <motion.div
+              key={l.to}
+              initial={{ opacity: 0, x: -14 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: Math.min(0.05 * idx, 0.5), type: "spring", stiffness: 300, damping: 24 }}
+              whileHover={{ x: 3 }}
+            >
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link to={l.to} className="block">
+                    <div className="relative">
+                      {active && (
+                        <motion.div
+                          layoutId="active-nav-bg"
+                          className="absolute inset-0 rounded-xl bg-sidebar-accent border border-sidebar-border/80"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ type: "spring", stiffness: 350, damping: 35 }}
+                        />
+                      )}
+                      <div
+                        className={`relative z-10 flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors duration-200 ${
+                          active ? "text-sidebar-foreground" : "text-sidebar-foreground/50 hover:text-sidebar-foreground/90 hover:bg-sidebar-accent/40"
+                        }`}
+                      >
+                        <motion.div
+                          whileHover={{ scale: 1.35, rotate: active ? 0 : [-8, 8, 0] }}
+                          transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                          className={`flex items-center justify-center size-7 rounded-lg transition-colors duration-200 ${active ? "bg-sidebar-border/80" : "bg-sidebar-border/20"}`}
+                        >
+                          <motion.span
+                            animate={active ? { scale: [1, 1.25, 1] } : {}}
+                            transition={{ duration: 0.4 }}
+                          >
+                            <l.icon className={`size-3.5 ${active ? l.color : ""}`} />
+                          </motion.span>
+                        </motion.div>
+                        {sidebarOpen && <span className="flex-1">{l.label}</span>}
+                        {active && sidebarOpen && (
+                          <motion.span
+                            initial={{ opacity: 0, x: -4 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.25 }}
+                          >
+                            <ChevronRight className="size-3.5 text-sidebar-foreground/30" />
+                          </motion.span>
+                        )}
                       </div>
-                      {sidebarOpen && <span className="flex-1">{l.label}</span>}
-                      {active && sidebarOpen && <ChevronRight className="size-3.5 text-sidebar-foreground/30" />}
                     </div>
-                  </div>
-                </Link>
-              </TooltipTrigger>
-              {!sidebarOpen && <TooltipContent side="right">{l.label}</TooltipContent>}
-            </Tooltip>
+                  </Link>
+                </TooltipTrigger>
+                {!sidebarOpen && <TooltipContent side="right">{l.label}</TooltipContent>}
+              </Tooltip>
+            </motion.div>
           );
         })}
       </nav>
 
       {/* Glow decoration */}
       {sidebarOpen && <div className="mx-5 my-4 h-px bg-gradient-to-r from-transparent via-sidebar-border to-transparent" />}
+
+      {/* Bottom collapse button (clearly visible) */}
+      {sidebarOpen && !mobile && (
+        <div className="px-3 flex-shrink-0">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="w-full flex items-center gap-2 rounded-xl border border-sidebar-border/60 bg-sidebar-accent/40 px-3 py-2 text-[12px] font-medium text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-200 cursor-pointer active:scale-[0.98]"
+              >
+                <ChevronsLeft className="size-3.5" />
+                <span className="flex-1 text-left">Collapse sidebar</span>
+                <span className="text-[10px] opacity-40">‹</span>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Hide sidebar to focus</TooltipContent>
+          </Tooltip>
+        </div>
+      )}
 
       {/* User Profile */}
       {sidebarOpen && (

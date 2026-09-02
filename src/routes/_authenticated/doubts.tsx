@@ -100,34 +100,53 @@ function Doubts() {
   ];
 
   return (
-    <div className="grid h-[calc(100vh-56px)] md:h-screen bg-background overflow-hidden" style={{ gridTemplateColumns: sidebarOpen ? "260px 1fr" : "56px 1fr" }}>
+    <div className="grid h-[calc(100vh-56px)] md:h-screen bg-background overflow-hidden" style={{ gridTemplateColumns: sidebarOpen ? "260px 1fr" : "72px 1fr" }}>
 
       <TooltipProvider>
-      <aside className={`border-r border-border/50 bg-muted/30 backdrop-blur-sm flex flex-col overflow-hidden transition-all duration-300 ${sidebarOpen ? "w-[260px]" : "w-[56px]"}`}>
-        <div className="flex items-center justify-between p-3 border-b border-border/40 flex-shrink-0 gap-2">
+      <aside className={`border-r border-emerald-200/70 bg-emerald-50/70 backdrop-blur-sm flex flex-col overflow-hidden transition-all duration-300 ${sidebarOpen ? "w-[260px]" : "w-[72px]"}`}>
+        <div className="flex items-center justify-between p-3 border-b border-emerald-200/60 flex-shrink-0 gap-2">
           {sidebarOpen ? (
             <div className="mb-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-muted-foreground/60 mb-0.5">AI Teacher</p>
-              <p className="font-display text-lg text-foreground leading-none">Ask Doubts</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-emerald-700/60 mb-0.5">AI Teacher</p>
+              <p className="font-display text-lg text-emerald-900 leading-none">Ask Doubts</p>
             </div>
           ) : (
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/15 mx-auto">
-              <Sparkles className="size-4 text-primary" />
+            <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 border border-emerald-500/15 mx-auto">
+              <Sparkles className="size-4 text-emerald-600" />
             </div>
           )}
-          {sidebarOpen && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="flex items-center justify-center rounded-lg hover:bg-muted/60 p-1.5 transition-colors text-muted-foreground hover:text-foreground flex-shrink-0"
-                >
-                  <ChevronLeft className="size-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right">Collapse sidebar</TooltipContent>
-            </Tooltip>
-          )}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="group flex items-center justify-center gap-1 rounded-lg border border-emerald-200 bg-emerald-100/60 p-1.5 transition-colors text-emerald-700 hover:bg-emerald-200/70 flex-shrink-0 cursor-pointer active:scale-95"
+                aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+              >
+                {sidebarOpen ? (
+                  <motion.span
+                    key="dbts-collapse"
+                    initial={{ x: 0 }}
+                    animate={{ x: [0, -4, 4, -4, 4, 0] }}
+                    transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2.2, ease: "easeInOut" }}
+                    className="flex"
+                  >
+                    <ChevronLeft className="size-4 group-hover:-translate-x-0.5 transition-transform" />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="dbts-expand"
+                    initial={{ x: 0 }}
+                    animate={{ x: [0, -4, 4, -4, 4, 0] }}
+                    transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2.2, ease: "easeInOut" }}
+                    className="flex"
+                  >
+                    <ChevronRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
+                  </motion.span>
+                )}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">{sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}</TooltipContent>
+          </Tooltip>
         </div>
 
         <div className="px-2 pb-2 flex-shrink-0">
@@ -135,8 +154,8 @@ function Doubts() {
             <TooltipTrigger asChild>
               <button
                 onClick={() => newThread()}
-                className={`w-full flex items-center justify-center gap-2 rounded-xl h-9 bg-primary/10 hover:bg-primary/20 border border-primary/15 text-primary text-sm font-semibold shadow-sm transition-all ${
-                  sidebarOpen ? "" : "h-10 rounded-xl bg-primary text-white hover:bg-primary/90 shadow-md shadow-primary/20"
+                className={`w-full flex items-center justify-center gap-2 rounded-xl h-9 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-700 text-sm font-semibold shadow-sm transition-all ${
+                  sidebarOpen ? "" : "h-10 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700/90 shadow-md shadow-emerald-600/20"
                 }`}
               >
                 <Plus className="size-4" />
@@ -158,10 +177,10 @@ function Doubts() {
                       className={`w-full rounded-xl px-3 py-2.5 text-left text-sm transition-all duration-200 flex items-center gap-2.5 ${
                         sidebarOpen ? "" : "justify-center px-0"
                       } ${
-                        activeId === t.id ? "bg-primary/10 text-primary border border-primary/15 shadow-sm" : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-transparent"
+                        activeId === t.id ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 shadow-sm" : "text-emerald-900/70 hover:text-emerald-900 hover:bg-emerald-100/70 border border-transparent"
                       }`}
                     >
-                      <MessageSquare className={`size-3.5 flex-shrink-0 ${activeId === t.id ? "text-primary" : "opacity-40"}`} />
+                      <MessageSquare className={`size-3.5 flex-shrink-0 ${activeId === t.id ? "text-emerald-600" : "opacity-40"}`} />
                       {sidebarOpen && <span className="truncate font-medium text-[13px]">{t.title}</span>}
                     </button>
                   </TooltipTrigger>
@@ -169,7 +188,7 @@ function Doubts() {
                 </Tooltip>
               </li>
             ))}
-            {(threads ?? []).length === 0 && sidebarOpen && <p className="text-xs text-center text-muted-foreground/60 py-6">No doubts yet. Start a new one!</p>}
+            {(threads ?? []).length === 0 && sidebarOpen && <p className="text-xs text-center text-emerald-800/40 py-6">No doubts yet. Start a new one!</p>}
           </ul>
         </ScrollArea>
 
@@ -178,12 +197,32 @@ function Doubts() {
             <TooltipTrigger asChild>
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className={`w-full flex items-center justify-center gap-2 rounded-xl py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all ${
-                  !sidebarOpen ? "py-2.5 hover:bg-primary/10" : ""
+                className={`group w-full flex items-center justify-center gap-2 rounded-xl py-2 text-xs text-emerald-800/70 hover:text-emerald-900 hover:bg-emerald-100/70 transition-all cursor-pointer ${
+                  !sidebarOpen ? "py-2.5 hover:bg-emerald-500/10" : ""
                 }`}
               >
-                {sidebarOpen ? <ChevronLeft className="size-3.5" /> : <ChevronRight className="size-3.5 text-primary" />}
-                {sidebarOpen && <span>Collapse</span>}
+                {sidebarOpen ? (
+                  <motion.span
+                    key="dbts-bottom-collapse"
+                    initial={{ x: 0 }}
+                    animate={{ x: [0, -3, 3, -3, 3, 0] }}
+                    transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2.2, ease: "easeInOut" }}
+                    className="flex items-center gap-2"
+                  >
+                    <ChevronLeft className="size-3.5" />
+                    <span>Collapse</span>
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="dbts-bottom-expand"
+                    initial={{ x: 0 }}
+                    animate={{ x: [0, -3, 3, -3, 3, 0] }}
+                    transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2.2, ease: "easeInOut" }}
+                    className="flex"
+                  >
+                    <ChevronRight className="size-3.5 text-emerald-600" />
+                  </motion.span>
+                )}
               </button>
             </TooltipTrigger>
             {!sidebarOpen && <TooltipContent side="right">Expand sidebar</TooltipContent>}
@@ -236,13 +275,24 @@ function Doubts() {
                   ) : (
                     <div className="w-full">
                       <div className="rounded-3xl border border-border/40 bg-gradient-to-br from-card to-muted/20 shadow-xl shadow-primary/5 overflow-hidden">
-                        <div className="flex items-center gap-2.5 px-5 py-3 border-b border-border/30 bg-gradient-to-r from-primary/10 to-gold/10">
-                          <div className="relative flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 border border-primary/20 shadow-md shadow-primary/20">
-                            <Sparkles className="size-3.5 text-white" />
+                        <div className="relative overflow-hidden flex items-center gap-2.5 px-5 py-3 border-b border-white/10 bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500">
+                          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 85% -40%, rgba(255,255,255,0.28), transparent 55%)" }} />
+                          <div className="absolute -left-8 -top-10 size-28 rounded-full bg-white/15 blur-2xl pointer-events-none" />
+                          <div className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-white/15 border border-white/25 backdrop-blur-sm shadow-lg shadow-emerald-900/20">
+                            <motion.div animate={{ scale: [1, 1.25, 1] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}>
+                              <Sparkles className="size-4 text-white" />
+                            </motion.div>
                           </div>
-                          <div>
-                            <span className="text-xs font-semibold uppercase tracking-wider text-primary-foreground">AI Teacher</span>
-                            <span className="text-[10px] text-muted-foreground ml-2">Gemini 2.5 Flash</span>
+                          <div className="relative">
+                            <span className="text-xs font-bold uppercase tracking-wider text-white drop-shadow-sm">AI Teacher</span>
+                            <span className="text-[10px] text-white/80 ml-2">Gemini 2.5 Flash</span>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="relative flex size-1.5">
+                                <span className="absolute inline-flex h-full w-full rounded-full bg-white/80 animate-ping" />
+                                <span className="relative inline-flex size-1.5 rounded-full bg-white" />
+                              </span>
+                              <span className="text-[9px] text-white/60 font-medium tracking-wide">ONLINE · RAG + ICAI MODULES</span>
+                            </div>
                           </div>
                         </div>
                         <div className="px-5 py-4">
