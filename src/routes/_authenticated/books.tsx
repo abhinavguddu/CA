@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { BookOpen, Plus, Upload, X, Maximize2, ChevronLeft, ChevronRight, ChevronsUpDown, FileText, Trash2, ExternalLink, ListChecks, Lightbulb } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/_authenticated/books")({ component: BooksPage });
 
@@ -135,9 +136,31 @@ function BooksPage() {
                       <span className="text-xs text-muted-foreground">No file</span>
                     )}
                     {(mcqCounts?.[b.id] ?? 0) > 0 && (
-                      <Button size="sm" variant="secondary" className="flex-1" onClick={() => setPractice(b)}>
-                        <ListChecks className="size-4" /> MCQs ({mcqCounts?.[b.id]})
-                      </Button>
+                      <motion.div
+                        className="relative flex-1"
+                        whileHover={{ y: -2, scale: 1.02 }}
+                        whileTap={{ scale: 0.97 }}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      >
+                        <span className="pointer-events-none absolute -inset-0.5 animate-pulse rounded-lg bg-gradient-to-r from-amber-400/50 via-gold/50 to-amber-400/50" />
+                        <Button
+                          size="sm"
+                          className="relative w-full gap-2 border-amber-300/60 bg-gradient-to-r from-amber-500 to-gold text-sidebar shadow-lg shadow-amber-500/25 transition-shadow hover:shadow-amber-500/40"
+                          onClick={() => setPractice(b)}
+                        >
+                          <span className="relative flex size-2.5">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+                            <span className="relative inline-flex size-2.5 rounded-full bg-white" />
+                          </span>
+                          <ListChecks className="size-4" />
+                          <span className="font-semibold">Practice MCQs</span>
+                          <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[11px] font-bold tabular-nums">
+                            {mcqCounts?.[b.id]}
+                          </span>
+                        </Button>
+                      </motion.div>
                     )}
                     {canManage && url && (
                       <Button size="sm" variant="outline" onClick={() => window.open(url, "_blank")}>
@@ -172,9 +195,18 @@ function BooksPage() {
         <PdfReader book={reading} url={bookUrl(reading)} onClose={() => setReading(null)} />
       )}
 
-      {practice && (
-        <McqReader book={practice} onClose={() => { setPractice(null); refetchCounts(); }} />
-      )}
+      <AnimatePresence>
+        {practice && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            <McqReader book={practice} onClose={() => { setPractice(null); refetchCounts(); }} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -496,7 +528,13 @@ function McqReader({ book, onClose }: { book: Book; onClose: () => void }) {
   const progress = questions && questions.length > 0 ? qIndex + 1 : 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background">
+    <motion.div
+      initial={{ opacity: 0, y: 24, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 24, scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 320, damping: 28 }}
+      className="fixed inset-0 z-50 flex flex-col bg-background"
+    >
       <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
           <ListChecks className="size-5 shrink-0 text-primary" />
@@ -613,6 +651,6 @@ function McqReader({ book, onClose }: { book: Book; onClose: () => void }) {
           <p className="pt-16 text-center text-muted-foreground">No questions in this chapter.</p>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

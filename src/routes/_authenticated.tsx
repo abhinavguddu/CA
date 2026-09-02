@@ -70,17 +70,17 @@ function Layout() {
 
   const links = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", color: "text-emerald-400" },
+    { to: "/past-questions", icon: FileQuestion, label: "Past Questions", color: "text-amber-400" },
+    { to: "/books", icon: BookOpen, label: "Books", color: "text-yellow-400" },
+    { to: "/doubts", icon: MessageSquare, label: "Ask Doubts", color: "text-blue-400" },
+    { to: "/revision", icon: Zap, label: "Quick Revision", color: "text-rose-400" },
+    { to: "/formula-sheets", icon: FileText, label: "Formula Sheets", color: "text-cyan-400" },
+    { to: "/mock-test", icon: ClipboardList, label: "Mock Test", color: "text-purple-400" },
     { to: "/planner", icon: CalendarDays, label: "Study Planner", color: "text-indigo-400" },
     { to: "/flashcards", icon: Layers, label: "Flash Cards", color: "text-amber-400" },
     { to: "/analytics", icon: BarChart3, label: "Analytics", color: "text-blue-400" },
-    { to: "/revision", icon: Zap, label: "Quick Revision", color: "text-rose-400" },
-    { to: "/doubts", icon: MessageSquare, label: "Ask Doubts", color: "text-blue-400" },
     { to: "/syllabus", icon: BookOpen, label: "Syllabus", color: "text-violet-400" },
-    { to: "/past-questions", icon: FileQuestion, label: "Past Questions", color: "text-amber-400" },
-    { to: "/mock-test", icon: ClipboardList, label: "Mock Test", color: "text-purple-400" },
     { to: "/bookmarks", icon: Bookmark, label: "Bookmarks", color: "text-pink-400" },
-    { to: "/formula-sheets", icon: FileText, label: "Formula Sheets", color: "text-cyan-400" },
-    { to: "/books", icon: BookOpen, label: "Books", color: "text-yellow-400" },
     { to: "/streaks", icon: Flame, label: "Study Streak", color: "text-orange-400" },
     ...(isTeacher ? [{ to: "/teacher", icon: Upload, label: "Knowledge Base", color: "text-rose-400" }] : []),
     ...(isAdmin ? [{ to: "/admin", icon: ShieldCheck, label: "Live Activity", color: "text-gold" }] : []),
@@ -88,7 +88,7 @@ function Layout() {
 
   const initials = user.email?.substring(0, 2).toUpperCase() || "CA";
 
-  const SidebarContent = () => (
+  const SidebarContent = ({ mobile = false }: { mobile?: boolean }) => (
     <div className="flex flex-col h-full">
       {/* Logo & Collapse */}
       <div className="px-4 pt-5 pb-4 flex items-center justify-between flex-shrink-0">
@@ -106,17 +106,19 @@ function Layout() {
             </div>
           )}
         </div>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="flex items-center justify-center rounded-lg hover:bg-sidebar-border/40 p-1.5 transition-colors text-sidebar-foreground/50 hover:text-sidebar-foreground flex-shrink-0"
-            >
-              {sidebarOpen ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="right">{sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}</TooltipContent>
-        </Tooltip>
+        {!mobile && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="flex items-center justify-center rounded-lg hover:bg-sidebar-border/40 p-1.5 transition-colors text-sidebar-foreground/50 hover:text-sidebar-foreground flex-shrink-0"
+              >
+                {sidebarOpen ? <ChevronLeft className="size-4" /> : <ChevronRight className="size-4" />}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">{sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}</TooltipContent>
+          </Tooltip>
+        )}
       </div>
 
       {/* Divider */}
@@ -245,17 +247,17 @@ function Layout() {
                 animate={{ x: 0 }}
                 exit={{ x: "-100%" }}
                 transition={{ type: "spring", bounce: 0, duration: 0.38 }}
-                className="fixed inset-y-0 left-0 z-50 w-[260px] flex-col bg-sidebar md:hidden flex overflow-hidden"
-              >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-3 top-3 text-sidebar-foreground/50 hover:text-sidebar-foreground rounded-xl z-10"
-                  onClick={() => setMobileMenuOpen(false)}
+className="fixed inset-y-0 left-0 z-50 w-[260px] flex-col bg-sidebar md:hidden flex overflow-hidden"
                 >
-                  <X className="size-5" />
-                </Button>
-                <SidebarContent />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-3 top-3 text-sidebar-foreground/50 hover:text-sidebar-foreground rounded-xl z-10"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <X className="size-5" />
+                  </Button>
+                  <SidebarContent mobile />
               </motion.aside>
             </>
           )}
